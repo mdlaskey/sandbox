@@ -1,0 +1,5 @@
+
+deb http://ftp.csse.rose-hulman.edu/ubuntu precise main restricted universe multiverse
+deb http://ftp.csse.rose-hulman.edu/ubuntu precise-updates main restricted universe multiverse
+deb http://ftp.csse.rose-hulman.edu/ubuntu precise-security main restricted universe multiverse
+

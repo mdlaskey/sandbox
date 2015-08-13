@@ -1,0 +1,274 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# C++ version Copyright (c) 2006-2007 Erin Catto http://www.box2d.org
+# Python version by Ken Lauer / sirkne at gmail dot com
+# 
+# This software is provided 'as-is', without any express or implied
+# warranty.  In no event will the authors be held liable for any damages
+# arising from the use of this software.
+# Permission is granted to anyone to use this software for any purpose,
+# including commercial applications, and to alter it and redistribute it
+# freely, subject to the following restrictions:
+# 1. The origin of this software must not be misrepresented; you must not
+# claim that you wrote the original software. If you use this software
+# in a product, an acknowledgment in the product documentation would be
+# appreciated but is not required.
+# 2. Altered source versions must be plainly marked as such, and must not be
+# misrepresented as being the original software.
+# 3. This notice may not be removed or altered from any source distribution.
+
+"""
+lqr_controller_new.py
+LQR Controller NEW
+
+Author: Sam Staszak
+"""
+import math
+import numpy as np
+from sympy import *
+import time
+
+class LQRController:
+    def __init__(self, dynamics, cost = None):
+	self.d = dynamics
+	self.c = cost	
+	self.eps = 10.0**-6
+
+
+    def genericQR(self):
+        pass		
+
+    def computeQR(self, x_t, u_t, t):
+	d_g_x = self.getFiniteDiff1(self.c, x_t, u_t, True)
+	d_g_u = self.getFiniteDiff1(self.c, x_t, u_t, False)
+	d_g_xx = self.getFiniteDiff2(self.c, x_t, u_t, True)
+	d_g_xu = self.getFiniteDiff2XY(self.c, x_t, u_t)
+	d_g_uu = self.getFiniteDiff2(self.c, x_t, u_t, False)
+
+	uBar = (self.uTars[t] - u_t)
+	xBar = (self.xTars[t] - x_t)
+
+	q_11 = (.5*d_g_xx)
+	q_12 = (d_g_xu * uBar)
+	q_21 = d_g_x
+	q_22 = self.c.solve(x_t, u_t) - self.c.solve(self.xTars[t], self.uTars[t]) +\
+	d_g_x*xBar + d_g_u*uBar + (.5*xBar*d_g_xx*xBar) + (.5*uBar*d_g_uu*uBar)
+
+	Q = np.matrix([[q_11, q_12],
+                       [q_21, q_22]])
+
+       	R = np.matrix([[(.5*d_g_uu)]])
+
+       	return [Q, R]
+
+    def doMulti(self, M, N):
+        #print (str(N))
+        r = M.shape[0]
+        c = N.shape[1]
+        L = np.zeros(shape=(r, c), dtype=object)
+        for i in range(r):
+            #print r
+            for j in range(c):
+                #print c
+                #print(N.shape[0])
+                for k in range(N.shape[0]):
+                    #print ("M[i,k]: " + str(M[i,k]))
+                    #print ("N[k,j]: " + str(N[k,j]))
+                    #print ("L[i,j]: " + str(L[i,j]))
+                    
+                    L[i, j] += M[i, k] * N[k, j]
+
+        #print ("L: " + str(L))
+
+        return L
+
+class Iteration:
+    def __init__(self, x, x_f, u, d, c):
+        
+        # current trajectory
+        self.x = x
+        self.u = u
+        self.x_f = x_f
+        
+        # dynamics and cost functions
+        self.d = d
+        self.c = c
+
+        def iterate(self):
+            # iterations
+            n = x.shape[0]-1
+            # soon to be change in u
+            du = np.zeros(shape=u.shape, dtype=object)
+            dx = 10.0**-9 * np.ones(shape=x.shape, dtype=object)
+            
+            K = np.zeros(shape=(1, n), dtype=object)
+            K_v = np.zeros(shape=(1, n), dtype=object)
+            K_u = np.zeros(shape=(1, n), dtype=object)
+
+            S = np.zeros(shape=(1, n+1), dtype=object)
+            v = np.zeros(shape=(1, n+1), dtype=object)
+
+            [Q_f, R_f] = self.c.approximate(self.x[n], self.u[n], n)
+            S[n] = Q_f
+            v[n] = np.dot(Q_f, np.matrix([[(self.x[n] - x_f).transpose()], [1]]))
+
+            for i in range(1, n + 1):
+                curr = n - i
+                u_i = self.u[i]
+                x_i = self.x[i]
+                [A_i, B_i] = self.d.linearize(
+                
+            
+            
+            
+        
+
+class Cost:
+    def __init__(self, func):
+	self.func = func
+	
+    def solve(self, x_t, u_t):
+	pass
+
+
+class Dynamics:
+    def __init__(self, x_init, u_init):
+	#t = Symbol('t')
+	#u_s = Symbol('u_s')
+	#u_p = Symbol('u_p')
+
+        self.x0 = x_init
+        self.u0 = u_init
+        self.xs = [x_init]
+        self.us = [u_init]
+
+    def solve(self, X, U):
+	dx = U[0,0] * math.cos(X[0,2])
+	dy = U[0,0] * math.sin(X[0,2])
+	dt = U[0,0] * math.tan(U[0,1])
+	N = np.matrix([dx, dy, dt])
+		
+        return N
+
+    def setCurrentTrajectory(self, x, u):
+        self.xs = x
+        self.us = u
+
+    def getCurrentState(self, t):
+        return self.xs[t]
+
+    def getCurrentControl(self, t):
+        return self.us[t]
+
+    def addIteration(self, x_t, u_t):
+        self.xs.append(x_t)
+        self.us.append(u_t)
+
+    def linearize(self, x_t, u_t, eps, t):
+        
+        def computeA(x_t, u_t, eps, t):
+            A_j = np.zeros(shape=(x_t.shape[1], x_t.shape[1]))
+
+            for i in range(x_t.shape[1]):
+                A_j[i] = m.getFiniteDiff1(self, x_t, u_t, eps, i, True)
+
+            a_12 = self.solve(x_t, u_t) - self.getCurrentState(t+1)
+            A_t = np.matrix([[A_j.transpose(), a_12.transpose()],
+                             [0, 1]])
+            return A_t
+
+        def computeB(x_t, u_t, eps, t):
+            B_j = np.zeros(shape=(u_t.shape[1], x_t.shape[1]))
+
+            for i in range(u_t.shape[1]):
+                B_j[i] = m.getFiniteDiff1(self, x_t, u_t, eps, i, False)
+
+            B_t = np.matrix([[B_j.transpose()],
+                             [0]])
+            return B_t
+
+        return [computeA(x_t, u_t, eps, t), computeB(x_t, u_t, eps, t)]
+
+
+class LQRMath:
+    def __init__(self):
+        pass
+
+    def getDelta(self, var, eps):
+	return var * eps
+
+    def getFiniteDiff1(self, f, x, y, eps, index, firstTerm):
+	if firstTerm:
+            d_x = np.zeros(shape=x.shape)
+	    d_x[0, index] = self.getDelta(x[0,index], eps)
+ 	    top = (f.solve(x + d_x, y) -\
+                       f.solve(x - d_x, y))
+            bottom = 2 * d_x
+            
+	else:
+            d_y = np.zeros(shape=y.shape)
+	    d_y[0, index] = self.getDelta(y[0,index], eps)
+	    top = (f.solve(x, y + d_y) -\
+                       f.solve(x, y - d_y))
+            bottom = 2 * d_y
+
+        top = top / bottom[0,index]
+        
+        return top
+
+    
+    def getFiniteDiff2(self, f, x, y, firstTerm):
+	if firstTerm:
+	    d_x = self.getDelta(x)
+	    return (f.solve(x + d_x, y) -\
+			2*f.solve(x, y) +\
+	        	f.solve(x - d_x, y)) / (d_x**2)
+	else:
+	    d_y = self.getDelta(y)
+	    return (f.solve(x, y + d_y) -\
+			2*f.solve(x, y) +\
+	        	f.solve(x, y - d_y)) / (d_y**2)
+
+    def getFiniteDiff2XY(self, f, x, y):
+	d_x = self.getDelta(x)
+	d_y = self.getDelta(y)
+	return (f.solve(x + d_x, y + d_y) -\
+                    f.solve(x + d_x, y - d_y) -\
+                    f.solve(x - d_x, y + d_y) +\
+                    f.solve(x - d_x, y - d_y)) / (4*d_x*d_y)
+
+    def transposeAll(self, M):
+    
+	    
+
+
+def main():
+    np.set_printoptions(suppress=True, precision=4)
+    
+    x_init = np.matrix([1, 1, math.pi/3.0])
+    u_init = np.matrix([3, math.pi/6.0])
+	
+    d = Dynamics(x_init, u_init)
+    lqr = LQRController(d)
+
+    xGuess = [x_init, d.solve(x_init, u_init)]
+    print("Solution: " + str(d.solve(x_init, u_init)))
+    uGuess = [u_init, np.matrix([1, math.pi/4])]
+
+    d.setCurrentTrajectory(xGuess, uGuess)
+
+    [A,B] = d.linearize(x_init, u_init, 10.0**-6, 0)
+    #print ("A: " + str(A))
+    print ("B: " + str(B))
+
+    D = np.dot(A, np.matrix([[x_init.transpose()], [1]])) +\
+                  np.matrix([[np.dot(B[0,0], u_init.transpose())],
+                             [0]])
+    print ("D: " + str(D))
+
+
+
+if __name__ == '__main__':
+    m = LQRMath()
+    main()

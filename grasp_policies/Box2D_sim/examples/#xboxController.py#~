@@ -1,0 +1,71 @@
+import pygame
+
+
+class XboxController:
+    def __init__(self):
+        pygame.joystick.init()
+        self.controller = pygame.joystick.Joystick(0)
+        
+        self.lStick = LeftStick(self.controller.get_axis(0),
+                                   self.controller.get_axis(1))
+        self.rStick = RightStick(self.controller.get_axis(2),
+                                     self.controller.get_axis(3))
+        self.dPad = DPad(self.controller.get_hat(0))
+        self.lTrigger = LeftTrigger(self.controller.get_axis(5))
+        self.rTrigger = RightTrigger(self.controller.get_axis(4))
+
+    def getControllerState(self):
+        
+
+class LeftStick:
+    def __init__(self, axis0, axis1):
+        self.axis0 = axis0
+        self.axis1 = axis1
+
+    def getPosition(self):
+        return [self.axis0, self.axis1]
+
+    '''def isInUse(self):
+        return (self.axis0 != 0 or self.axis1 !=0)'''
+
+
+class RightStick:
+    def __init__(self, axis0, axis1):
+        self.axis0 = axis0
+        self.axis1 = axis1
+
+    def getPosition(self):
+        return [self.axis0, self.axis1]
+
+    '''def isInUse(self):
+        return (self.axis0 != 0 or self.axis1 !=0)'''
+
+class DPad:
+    def __init__(self, hat):
+        self.hat = hat
+
+    def getPosition(self):
+        return self.hat
+
+    '''def isInUse(self):
+        return (self.hat[0] != 0 or self.hat[1] != 0)'''
+
+class LeftTrigger:
+    def __init__(self, axis0):
+        self.axis0 = axis0
+
+    def getPosition(self):
+        return self.axis0
+
+    '''def isInUse(self):
+        return self.axis0 != -1'''
+
+class RightTrigger:
+    def __init__(self, axis0):
+        self.axis0 = axis0
+
+    def getPosition(self):
+        return self.axis0
+
+    '''def isInUse(self):
+        return self.axis0 != -1'''
