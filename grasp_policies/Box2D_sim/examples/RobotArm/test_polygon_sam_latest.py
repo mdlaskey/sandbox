@@ -45,7 +45,7 @@ class Polygon:
         self.linearDamping_ = linearDamping
         self.angularDamping_ = angularDamping
 
-        s = b2Separator()
+        #s = b2Separator()
 
         if vertices == None:
             self.radius = radius
@@ -901,13 +901,13 @@ class GraspingWorld(Framework):
             newInput = self.givenInputs[0]
         else:
             inpt = self.inputs[0]
-            newInput = np.array([.9*inpt[0],.9*inpt[1],inpt[2],inpt[3]])
+            newInput = np.array([1.5*inpt[0],1.5*inpt[1],inpt[2],inpt[3]])
         for i in range(1, len(self.inputs)):
             if not self.inputs[i].any():
                 newInput = np.vstack((newInput, self.givenInputs[i]))
             else:
                 inpt = self.inputs[i]
-                inpt = np.array([.9*inpt[0],.9*inpt[1],inpt[2],inpt[3]])
+                inpt = np.array([1.5*inpt[0],1.5*inpt[1],inpt[2],inpt[3]])
                 newInput = np.vstack((newInput, inpt))
 
         return newInput

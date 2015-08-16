@@ -9,6 +9,7 @@ import time
 
 rollout = False
 view = False
+useSHIV = True
 itr = 900
 
 path = 'matrices/'
@@ -85,14 +86,22 @@ def labelPolicy(pInputs, initState):
         trial.reset()
 
         if option == "replay":
-            trial = createReplayTrial(pInputs, initState)
+            trial = createReplayTrial(pInputs, states)
         elif option == "save":
+            '''if useSHIV:
+                [newStates, newInpts] = useAHQP(states, inputs)
+                learner.updateModel(newStates, newInpts)
+            else:'''
             learner.updateModel(states, inputs)
             run = False
             return False
         elif option == "label":
             trial = createLabelTrial(pInputs, initState)
         elif option == "end":
+            '''if useSHIV:
+                [newStates, newInpts] = useAHQP(states, inputs)
+                learner.updateModel(newStates, newInpts)
+            else:'''
             learner.updateModel(states, inputs)
             
             run = False
@@ -110,8 +119,24 @@ def labelPolicy(pInputs, initState):
         else:
             pass
 
+'''def useAHQP(states, inputs):
+    statesToUse = np.array([])
+    inputsToUse = np.array([])
+    for i in range(len(states)):
+        use = learner.askForHelp(states[i])
+        if use == -1:
+            if len(statesToUse) == 0:
+                statesToUse = states[i]
+                inputsToUse = inputs[i]
+            else:
+                statesToUse = np.vstack((statesToUse, states[i]))
+                inputsToUse = np.vstack((inputsToUse, inputs[i]))
+    return [statesToUse, inputsToUse]'''
+
+            
+
 def run():
-    learner.initModel()
+    learner.initModel(useSHIV)
     end = False
     train()
     while not end:
@@ -141,7 +166,7 @@ def train():
         
         if option == "retry":
             trial = createNewTrainingTrial()
-
+            
         #elif option == "save":
             #learner.updateModel(states, inputs)
             #trial = createNewTrainingTrial()
@@ -159,6 +184,7 @@ def train():
             sys.exit(0)
         else:
             pass
+        
 
     learner.saveModel()
     

@@ -124,6 +124,7 @@ class AHQP():
 
 	def caculateRho(self):
 		mw = 0.0
+		maxSup = 0.0 
 		for i in range(self.data.shape[0]):
 			if(mw < self.weights[i] and self.weights[i]<0.9/(self.nu_g*self.m)):
 				mw = self.weights[i]

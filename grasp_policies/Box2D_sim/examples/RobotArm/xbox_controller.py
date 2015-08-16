@@ -13,11 +13,15 @@ class XboxController:
                                    self.controller.get_axis(1))
         self.rStick = RightStick(self.controller.get_axis(2),
                                      self.controller.get_axis(3))
-        self.dPad = DPad(self.controller.get_hat(0))
-        self.lTrigger = LeftTrigger(self.controller.get_axis(5))
-        self.rTrigger = RightTrigger(self.controller.get_axis(4))
+        #self.dPad = DPad(self.controller.get_hat(0))
+        #self.dPad = DPad(self.controller.get_hat())
 
-        self.inUse = [False,False,False,False,False]
+        self.lTrigger = LeftTrigger(self.controller.get_axis(4))
+        self.rTrigger = RightTrigger(self.controller.get_axis(5))
+
+        #self.inUse = [False,False,False,False,False]
+        self.inUse = [False,False,False,False]
+
         
         self.scale = scale
         self.driftLimit = .09
@@ -66,7 +70,7 @@ class XboxController:
     def getCurrentState(self):
         state = {'left_stick':self.lStick.getPos(),
                      'right_stick':self.rStick.getPos(),
-                     'd_pad':self.dPad.getPos(),
+                     #'d_pad':self.dPad.getPos(),
                      'left_trigger':self.lTrigger.getPos(),
                      'right_trigger':self.rTrigger.getPos()}
         return state
@@ -78,14 +82,18 @@ class XboxController:
                                        self.controller.get_axis(1))
             rstick = self.rStick.setCurrent(self.controller.get_axis(2),
                                          self.controller.get_axis(3))
-            dpad = self.dPad.setCurrent(self.controller.get_hat(0))
-            ltrigger = self.lTrigger.setCurrent(self.controller.get_axis(5))
-            rtrigger = self.rTrigger.setCurrent(self.controller.get_axis(4))
+            #dpad = self.dPad.setCurrent(self.controller.get_hat(0))
+            #dpad = self.dPad.setCurrent(self.controller.get_hat())
+            ltrigger = self.lTrigger.setCurrent(self.controller.get_axis(4))
+            rtrigger = self.rTrigger.setCurrent(self.controller.get_axis(5))
 
     def isInUse(self):
-        self.inUse = [self.lStick.isInUse(), self.rStick.isInUse(),
+        '''self.inUse = [self.lStick.isInUse(), self.rStick.isInUse(),
                       self.dPad.isInUse(), self.lTrigger.isInUse(),
-                      self.rTrigger.isInUse()]
+                      self.rTrigger.isInUse()]'''
+
+        self.inUse = [self.lStick.isInUse(), self.rStick.isInUse(),
+                        self.lTrigger.isInUse(), self.rTrigger.isInUse()]
         for thing in self.inUse:
             if thing:
                 return thing
