@@ -1,3 +1,5 @@
+from sys_globals import *
+
 class EndEffector:
     def __init__(self, transform, startPos, startAngle):
         self.transform = transform
@@ -18,7 +20,7 @@ class EndEffector:
 
     def move(self, state):
         state = state * .04
-        state[1] = state[1] * -1
+        #state[1] = state[1] * -1
         self.transform.position += state
         return self.transform.position
         
@@ -29,4 +31,4 @@ class EndEffector:
         return self.effector.changeAngle(.05)
 
     def getPosition(self):
-        return self.effector.getPosition()
+        return self.transform.position

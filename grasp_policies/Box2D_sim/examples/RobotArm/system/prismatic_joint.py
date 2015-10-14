@@ -1,3 +1,5 @@
+from sys_globals import *
+
 class RobotPrismaticJoint():
     def __init__(self, axis=(1,0), lower_translation=0.0, upper_translation=0.0,
                  enable_limit=True, motor_force=0.0, enable_motor=True, roc=0.03,
@@ -67,4 +69,3 @@ class RobotPrismaticJoint():
             self.pj_.motorSpeed = p_value * 1.5
         else:
             self.pj_.motorSpeed=0.0
-

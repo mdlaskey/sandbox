@@ -45,7 +45,7 @@ class Polygon:
         self.linearDamping_ = linearDamping
         self.angularDamping_ = angularDamping
 
-        s = b2Separator()
+        #s = b2Separator()
 
         if vertices == None:
             self.radius = radius
@@ -686,15 +686,17 @@ class GraspingWorld(Framework):
     #description=""
     hz=4
     zeta=0.7
-    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None):
+    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, state=None):
         super(GraspingWorld, self).__init__(gravity = (0,0))
         
         self.contactPoints = []
         self.outOfBounds = []
 
         self.rollout = rollout
+        self.learner = learner
         self.watch = watch
         self.label = label
+        self.givenStates = None
         self.color = b2Color(0.9,0.9,0.4)
        
         transform = b2Transform()
@@ -721,8 +723,12 @@ class GraspingWorld(Framework):
 
         if self.watch:
             self.givenInputs = inpt
-            self.initState = initState
-            self.states = np.array([initState])
+            if len(state.shape) == 1:
+                self.initState = state
+            else:
+                self.initState = state[0]
+                self.givenStates = state
+            self.states = np.array([self.initState])
             self.generateBoxes(self.numBoxes)
             if self.label:
                 self.xboxController = XboxController(.04)
@@ -735,7 +741,6 @@ class GraspingWorld(Framework):
             self.states = self.getState()
             self.initState = None
             if self.rollout:
-                self.learner = learner
                 self.policyInputs = self.getControlFromPolicy()
             else:
                 self.xboxController = XboxController(.04)
@@ -793,7 +798,8 @@ class GraspingWorld(Framework):
                 theta = 0.0
                 pos = np.array([x, y])
                 mean = np.zeros(2)
-                cov = np.eye(2) * 0
+                cov = np.eye(2) * .005
+                #cov = np.eye(2) * 0
                 pos = pos + np.random.multivariate_normal(mean, cov, 1)
 
                 self.factory.createNewBox(h,w,transform,pos[0],theta,self.world)
@@ -896,13 +902,13 @@ class GraspingWorld(Framework):
             newInput = self.givenInputs[0]
         else:
             inpt = self.inputs[0]
-            newInput = np.array([.9*inpt[0],.9*inpt[1],inpt[2],inpt[3]])
+            newInput = np.array([1.5*inpt[0],1.5*inpt[1],inpt[2],inpt[3]])
         for i in range(1, len(self.inputs)):
             if not self.inputs[i].any():
                 newInput = np.vstack((newInput, self.givenInputs[i]))
             else:
                 inpt = self.inputs[i]
-                inpt = np.array([.9*inpt[0],.9*inpt[1],inpt[2],inpt[3]])
+                inpt = np.array([1.5*inpt[0],1.5*inpt[1],inpt[2],inpt[3]])
                 newInput = np.vstack((newInput, inpt))
 
         return newInput
@@ -1016,6 +1022,18 @@ class GraspingWorld(Framework):
 
     def getBoxesOutOfBounds(self):
         return self.outOfBounds
+
+    def displayStateUsed(self, used):
+        if used:
+            self.Print("THIS STATE WAS USED!")
+        else:
+            self.Print("THIS STATE WASN'T USED!")
+
+    def checkIfInUsed(self, state):
+        for row in self.givenStates:
+            if np.array_equal(state, row):
+                return True
+        return False
         
     def Step(self, settings):
         super(GraspingWorld, self).Step(settings)
@@ -1072,11 +1090,25 @@ class GraspingWorld(Framework):
                 converted = np.array([uInpt[0][0], uInpt[0][1], uInpt[1], uInpt[2]])
                 if converted.any():
                     self.drawLabelingCursor(uInpt[0] + self.end.getPosition())
-                self.storeInput(uInpt)
-            self.applyInput(inpt)
-            state = self.getState()
-            #IPython.embed()
-            self.storeState(state)
+                # self.storeInput(uInpt)
+                self.applyInput(inpt)
+                state = self.getState()
+                use = self.learner.askForHelp(state)
+                if use == -1:
+                    self.displayStateUsed(True)
+                    self.storeInput(uInpt)
+                    self.storeState(state)
+                else:
+                    self.displayStateUsed(False)
+                    self.givenInputs = np.delete(self.givenInputs, self.i, axis=0)
+                    self.i-=1
+            else:
+                self.applyInput(inpt)
+                state = self.getState()
+                if self.givenStates != None:
+                    used = self.checkIfInUsed(state)
+                    self.displayStateUsed(used)
+                self.storeState(state)
 
         else:
             userInput = self.getUserInput()

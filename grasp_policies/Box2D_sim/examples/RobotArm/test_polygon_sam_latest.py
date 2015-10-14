@@ -239,6 +239,24 @@ class RobotArm:
         self.joint3_.update()
         self.gripper_.update()
 
+    def getEndEffector(self):
+        angles = self.getCurrentAngles()
+        start = np.matrix([[0.0],[0.0],[1.0]])
+        theta = self.L1_.getAngle()
+        position = self.L1_.getPosition()
+        T_w = np.matrix([[math.cos(theta),-math.sin(theta),position[0]],
+                         [math.sin(theta),math.cos(theta),self.h],
+                         [0,0,1.0]])
+
+        #print(str(angles*180/math.pi))
+
+        endEffector = T_w * self.joint1_.getParameterMatrix(angles[0])*\
+            self.joint2_.getParameterMatrix(angles[1])*\
+            (self.joint3_.getParameterMatrix(angles[2])+\
+                 self.gripper_.getParameterMatrix(angles[2]))* start
+        
+        return (endEffector[0,0], endEffector[1,0])
+
     def getInvKin(self, xy): 
         
         if xy[0] < 0.0:
@@ -333,9 +351,9 @@ class RobotGripper:
         transform = b2Transform()
         transform.angle = self.transform_.angle 
         # position = (-3, 27.25)
-        x = w/2.0 + ((self.lengthPalm-w)/2.0 - w_small) + w_small/2.0
+        self.x = w/2.0 + ((self.lengthPalm-w)/2.0 - w_small) + w_small/2.0
         y = 8*h/2.0 + w_small + h_small/2.0
-        transform.position = (-x, y)
+        transform.position = (-self.x, y)
         print(transform.position)
         self.gripperLeft_ = Polygon(vertices, transform)
 
@@ -344,7 +362,7 @@ class RobotGripper:
         transform = b2Transform()
         transform.angle = self.transform_.angle
         # position = (2.75, 27.25)
-        transform.position = (x, y)
+        transform.position = (self.x, y)
         self.gripperRight_ = Polygon(vertices, transform)
 
 
@@ -397,7 +415,7 @@ class RobotGripper:
         self.jointRight_.resetState()
 
     def getCenterPosition(self):
-        return (0, self.left_.position[1])
+        return (self.body_.worldCenter[0], self.left_.position[1])
 
     def getState(self):
         return self.jointLeft_.getState()
@@ -686,7 +704,7 @@ class GraspingWorld(Framework):
     #description=""
     hz=4
     zeta=0.7
-    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, state=None):
+    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None):
         super(GraspingWorld, self).__init__(gravity = (0,0))
         
         self.contactPoints = []
@@ -696,7 +714,6 @@ class GraspingWorld(Framework):
         self.learner = learner
         self.watch = watch
         self.label = label
-        self.givenStates = None
         self.color = b2Color(0.9,0.9,0.4)
        
         transform = b2Transform()
@@ -723,11 +740,7 @@ class GraspingWorld(Framework):
 
         if self.watch:
             self.givenInputs = inpt
-            if len(state.shape) == 1:
-                self.initState = state
-            else:
-                self.initState = state[0]
-                self.givenStates = state
+            self.initState = initState
             self.states = np.array([self.initState])
             self.generateBoxes(self.numBoxes)
             if self.label:
@@ -798,7 +811,8 @@ class GraspingWorld(Framework):
                 theta = 0.0
                 pos = np.array([x, y])
                 mean = np.zeros(2)
-                cov = np.eye(2) * 0
+                cov = np.eye(2) * .005
+                #cov = np.eye(2) * 0
                 pos = pos + np.random.multivariate_normal(mean, cov, 1)
 
                 self.factory.createNewBox(h,w,transform,pos[0],theta,self.world)
@@ -902,13 +916,17 @@ class GraspingWorld(Framework):
         else:
             inpt = self.inputs[0]
             newInput = np.array([1.5*inpt[0],1.5*inpt[1],inpt[2],inpt[3]])
+        #j = 1
         for i in range(1, len(self.inputs)):
             if not self.inputs[i].any():
                 newInput = np.vstack((newInput, self.givenInputs[i]))
+                #self.states = np.delete(self.states, j, axis=0)
+                #j-=1
             else:
                 inpt = self.inputs[i]
                 inpt = np.array([1.5*inpt[0],1.5*inpt[1],inpt[2],inpt[3]])
                 newInput = np.vstack((newInput, inpt))
+            #j+=1
 
         return newInput
 
@@ -1088,7 +1106,8 @@ class GraspingWorld(Framework):
                 uInpt = self.getUserInput()
                 converted = np.array([uInpt[0][0], uInpt[0][1], uInpt[1], uInpt[2]])
                 if converted.any():
-                    self.drawLabelingCursor(uInpt[0] + self.end.getPosition())
+                    # self.drawLabelingCursor(uInpt[0] + self.gripper.getCenterPosition())
+                    self.drawLabelingCursor(uInpt[0] + self.arm.getEndEffector())
                 # self.storeInput(uInpt)
                 self.applyInput(inpt)
                 state = self.getState()
@@ -1104,9 +1123,9 @@ class GraspingWorld(Framework):
             else:
                 self.applyInput(inpt)
                 state = self.getState()
-                if self.givenStates != None:
+                '''if self.givenStates != None:
                     used = self.checkIfInUsed(state)
-                    self.displayStateUsed(used)
+                    self.displayStateUsed(used)'''
                 self.storeState(state)
 
         else:

@@ -1,9 +1,11 @@
+from sys_globals import *
+
 class RobotGripper:
     def __init__(self, transform, height, width):
         self.transform_ = transform
         self.transform_ = b2Transform()
         self.transform_.angle = transform.angle
- 
+
         self.h_ = height
         self.w_ = width
         h = self.h_
@@ -68,6 +70,9 @@ class RobotGripper:
 
     def getPalm(self):
         return self.palm_
+
+    def getGrippers(self):
+        return [self.left_, self.right_]
 
     def getWorldCenter(self):
         return self.body_.worldCenter

@@ -24,26 +24,26 @@ class Learner():
     inptFile = os.path.join(path, inputF)
     stateFile = os.path.join(path, stateF)
     itrFile = os.path.join(path, itrF)
-    
+
     itr = np.array([])
 
     useSHIV = False
-    THRESH = 0.5
+    THRESH = 0.45
     ahqp_solver_g = AHQP()
-    ahqp_solver_b = AHQP(sigma=1e-2)
-    
+    ahqp_solver_b = AHQP(nu=1e-3)
+
 
     def trainModel(self, s=None, a=None):
         """
-	Trains model on given states and actions.
-	Uses neural net or SVM based on global
-	settings.
-	"""
-	states, actions = self.states[3:], self.actions[3:]
-	#print "states.shape"
-	#print states.shape
-	#print "actions.shape"
-	#print actions.shape
+        Trains model on given states and actions.
+        Uses neural net or SVM based on global
+        settings.
+        """
+        states, actions = self.states[3:], self.actions[3:]
+        #print "states.shape"
+        #print states.shape
+        #print "actions.shape"
+        #print actions.shape
 
         if len(self.itr) == 0:
             self.itr = np.array([states.shape[0]])
@@ -55,10 +55,11 @@ class Learner():
             np.save(f, states)
             IPython.embed()'''
 
-	#actions = actions.ravel()
-	self.clf = KernelRidge(alpha=1.0)
+        #actions = actions.ravel()
+        self.clf = KernelRidge(alpha=1.0)
+        self.clf.kernel = 'rbf'
         print "SIZE: ", states.shape
-	self.clf.fit(states, actions)
+        self.clf.fit(states, actions)
         actions_pred = self.clf.predict(states)
         bad_state = np.zeros(actions_pred.shape[0])
         for i in range(actions_pred.shape[0]):
@@ -73,7 +74,7 @@ class Learner():
             
             good_labels = bad_state == 0.0         
             states_g = states_proc[good_labels,:] 
-        
+
             bad_labels = bad_state == 1.0 
             states_b = states_proc[bad_labels,:] 
             #IPython.embed()
@@ -83,8 +84,8 @@ class Learner():
             self.ahqp_solver_g.solveQP()
             self.ahqp_solver_b.solveQP()
 
-        #score = self.clf.score(states, actions)
-        #print score
+            #score = self.clf.score(states, actions)
+            #print score
 
     def askForHelp(self,state):
         if self.useSHIV:

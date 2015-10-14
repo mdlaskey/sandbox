@@ -1,3 +1,5 @@
+from sys_globals import *
+
 class BoxFactory:
     def __init__(self):
         self.boxes = []
@@ -53,6 +55,27 @@ class BoxFactory:
         for i in range(len(self.boxes)):
             objects[i+1] = self.getStateBox(i)
         return objects'''
+
+    '''def getBoxesOffTable(self, table):
+        outOfBounds = []
+        transform = b2Transform()
+        eIn1 = b2RayCastInput(p1=table[0], p2=table[1], maxFraction=1)
+        eOut1 = b2RayCastOutput()
+        
+        eIn2 = b2RayCastInput(p1=table[1], p2=table[2], maxFraction=1)
+        eOut2 = b2RayCastOutput()
+
+        eIn3 = b2RayCastInput(p1=table[2], p2=table[3], maxFraction=1)
+        eOut3 = b2RayCastOutput()
+        
+        eIn4 = b2RayCastInput(p1=table[3], p2=table[0], maxFraction=1)
+        eOut4 = b2RayCastOutput()
+        for box in self.boxes:
+            hit1 = box.fixtures.RayCast(eOut1, eIn1, transform, 0)
+            if hit1 or hit2 or hit3 or hit4:
+                outOfBounds.append(box)
+            else:'''                
+            
     
     def getStateBoxes(self):
         objects = np.hstack((self.target.getPosition(), self.target.getAngle()))

@@ -1,3 +1,6 @@
+from sys_globals import *
+from gripper import RobotGripper
+
 class RobotArm:
     def __init__(self, transform, joint_angles):
         self.transform_ = transform
@@ -151,4 +154,3 @@ class RobotArm:
 
     def ready(self):
         return set(round(self.jointAngles_, 2)) == set(round(self.getCurrentAngles, 2))
-    

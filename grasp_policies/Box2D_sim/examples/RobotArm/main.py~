@@ -81,40 +81,24 @@ def labelPolicy(pInputs, initState):
             "s = save and train more\n" +\
             "ESC = end program"
         option = trial.run(itr, message)
-        states = trial.getStates()
         inputs = trial.getInputs()
+        states = trial.getStates()
         trial.reset()
 
         if option == "replay":
             trial = createReplayTrial(pInputs, states)
         elif option == "save":
-            '''if useSHIV:
-                [newStates, newInpts] = useAHQP(states, inputs)
-                learner.updateModel(newStates, newInpts)
-            else:'''
             learner.updateModel(states, inputs)
             run = False
             return False
         elif option == "label":
             trial = createLabelTrial(pInputs, initState)
         elif option == "end":
-            '''if useSHIV:
-                [newStates, newInpts] = useAHQP(states, inputs)
-                learner.updateModel(newStates, newInpts)
-            else:'''
             learner.updateModel(states, inputs)
             
             run = False
             return True
         elif option == "continue":
-            #f1 = open(pInpF, 'wb')
-            #f3 = open(cInpF, 'wb')
-            #f1.write(str(pInputs))
-            #f3.write(str(inputs))
-            #f1.close()
-            #f3.close()
-            #np.save(pInpF, pInputs)
-            #np.save(cInpF, inputs)
             pass
         else:
             pass
@@ -155,7 +139,7 @@ def train():
     run = True
     while run:
         message = "Trial " + str(i) + " completed!\n" +\
-            "e = end training and rollout learner policy\n" +\
+            "e = rollout learner policy\n" +\
             "r = replay your trajectory\n" +\
             "t = try trial again"
         option = trial.run(itr, message)
@@ -186,7 +170,7 @@ def train():
             pass
         
 
-    learner.saveModel()
+    #learner.saveModel()
     
 def createNewTrainingTrial():
     instance = GraspingWorld

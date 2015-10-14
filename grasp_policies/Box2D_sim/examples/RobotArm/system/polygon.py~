@@ -1,4 +1,4 @@
-from Box2D import *
+import sys_globals
 
 class Polygon:
     def __init__(self, vertices=None, transform=b2Transform(),
@@ -10,7 +10,7 @@ class Polygon:
         self.linearDamping_ = linearDamping
         self.angularDamping_ = angularDamping
 
-        s = b2Separator()
+        #s = b2Separator()
 
         if vertices == None:
             self.radius = radius
@@ -101,6 +101,9 @@ class Polygon:
 
     def getAngleDegrees(self):
         return self.body_.angle*180/math.pi
+	
+    def getPosition(self):
+        return np.array([self.body_.position[0], self.body_.position[1]])
 
     def changePosition(self, position):
         self.body_.position = np.add(self.body_.position, position)
@@ -109,7 +112,4 @@ class Polygon:
     def changeAngle(self, change):
         self.body_.angle += change
         return self.body_.angle   
-
-    def getPosition(self):
-        return np.array([self.body_.position[0], self.body_.position[1]])
 

@@ -18,15 +18,13 @@ from cvxopt import matrix, solvers
 import IPython
 
 
-
-
 class AHQP():
 
 	B = 1000
 
 	nu_b = 0.9
 	
-	def __init__(self,sigma=2,nu=1e-1):
+	def __init__(self,sigma=4,nu=1e-1):
 		self.sigma = sigma
 		self.nu_g = nu
 

@@ -1,0 +1,23 @@
+"""parse files"""
+
+import os
+import re
+from os import path
+
+class Parser():
+    def __init__(self):
+        path = os.getcwd()
+        self.files = os.listdir(path)
+        
+        self.regItr = 'itr\d.npy'
+        self.regResults = 'results\d.npy'
+
+    def parse(self):
+        for f in self.files:
+            match = re.match(self.regItr, f)
+            if match:
+                print "MATCH: ", f
+
+
+parser = Parser()
+parser.parse()

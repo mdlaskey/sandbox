@@ -1,0 +1,9 @@
+"""parse files"""
+
+import os
+from os import path
+
+class Parser():
+    def __init__(self):
+        self.files = [f for f in os.listdir(dirToScreens) if path.isfile(f)]
+        print self.files

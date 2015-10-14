@@ -1,3 +1,5 @@
+from sys_globals import *
+
 class RobotRevoluteJoint:
     def __init__(self, anchor=(0,0), target_angle=0.0,
                     lower_angle=-math.pi/2.0, upper_angle=math.pi/2.0, max_motor_torque=0.0,

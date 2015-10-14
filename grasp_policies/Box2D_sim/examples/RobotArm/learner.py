@@ -10,6 +10,7 @@ from sklearn import metrics
 from scipy.sparse import csr_matrix
 from scipy.sparse import vstack
 from time import gmtime, strftime
+import matplotlib.pyplot as plt
 import sys
 import os
 from AHQP import *
@@ -29,8 +30,8 @@ class Learner():
 
     useSHIV = False
     THRESH = 0.45
-    ahqp_solver_g = AHQP()
-    ahqp_solver_b = AHQP(sigma=1e-1)
+    ahqp_solver_g = AHQP(sigma=6)
+    ahqp_solver_b = AHQP(sigma=5,nu=1e-3)
 
 
     def trainModel(self, s=None, a=None):
@@ -55,17 +56,27 @@ class Learner():
             np.save(f, states)
             IPython.embed()'''
 
+        
+        fits = []
+
         #actions = actions.ravel()
         self.clf = KernelRidge(alpha=1.0)
         self.clf.kernel = 'rbf'
         print "SIZE: ", states.shape
         self.clf.fit(states, actions)
+        #IPython.embed()
         actions_pred = self.clf.predict(states)
         bad_state = np.zeros(actions_pred.shape[0])
         for i in range(actions_pred.shape[0]):
-            #print LA.norm(actions_pred[i,:] - actions[i,:])
-            if(LA.norm(actions_pred[i,:] - actions[i,:])>self.THRESH):
+            fit =  LA.norm(actions_pred[i,:] - actions[i,:])
+            fits.append(fit)
+
+        med = np.median(np.array(fits))
+        for fit in fits:
+            if(fit>med):
                 bad_state[i] = 1
+
+        IPython.embed()
 
         if self.useSHIV:
             self.labels = np.zeros(states.shape[0])+1.0
@@ -86,6 +97,8 @@ class Learner():
 
             #score = self.clf.score(states, actions)
             #print score
+        
+        self.plot(fits, states, med)
 
     def askForHelp(self,state):
         if self.useSHIV:
@@ -96,6 +109,18 @@ class Learner():
                 return self.ahqp_solver_g.predict(state)
         else:
             return -1
+
+    
+    def plot(self, fits, states, threshold):
+        index = range(len(states))
+        t = np.ones(len(index)) * threshold
+        plt.figure(1)
+        plt.plot(index, fits, color='b', linewidth=4.0)
+        plt.plot(index, t, color='r', linewidth=4.0)
+        plt.ylabel('Fit')
+        plt.xlabel('Index of State')
+
+        plt.show()
 
 
     def getAction(self, state):
