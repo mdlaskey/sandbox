@@ -249,7 +249,7 @@ class GraspingWorld(Framework):
     
     
     def drawTable(self):
-        IPython.embed()
+      
         self.renderer.DrawPolygon([self.renderer.to_screen(v) for v in self.table],self.color)
     
     def drawCursor(self, pos):
