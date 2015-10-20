@@ -1,6 +1,8 @@
 """ main script for Robot Arm """
 from framework import *
 from test_polygon_sam_latest import *
+from Classes.robotParts import *
+from Classes.robotArm import *
 from learner import *
 import math
 import numpy as np

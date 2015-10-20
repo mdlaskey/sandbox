@@ -16,10 +16,6 @@ Xbox input needs to be converted before it is stored as an input
 
 Fields:
 
-
-
-
-
 Author: Sam Staszak
 """
 from framework import *

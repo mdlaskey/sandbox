@@ -1,10 +1,14 @@
 import pygame
 import numpy as np
 import sys, os
+import IPython 
 
 class XboxController:
     def __init__(self, scale=0.5):
+        IPython.embed()
         pygame.joystick.init()
+        if(pygame.joystick.get_count() == 0):
+            return
         self.controller = pygame.joystick.Joystick(0)
         self.controller.init()
         
