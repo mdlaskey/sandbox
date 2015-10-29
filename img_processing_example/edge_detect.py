@@ -4,10 +4,14 @@ import cv2
 import IPython
 import segment
 
+import sys
+
+full_name = sys.argv[1]
+
+filename, ext = full_name.split('.')
+ext = '.' + ext
 
 #cv2.IMREAD_GRAYSCALE
-filename = 'frame0003'
-ext = '.jpg'
 img = cv2.imread('in/' + filename + ext)
 img = segment.hist_equalize(img)
 img = segment.blur_color(img)

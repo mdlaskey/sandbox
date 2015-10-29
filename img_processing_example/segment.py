@@ -14,7 +14,7 @@ def hist_equalize(img):
     cdf_m = (cdf_m - cdf_m.min())*255/(cdf_m.max()-cdf_m.min())
     cdf = np.ma.filled(cdf_m,0).astype('uint8')
     img = cdf[img]
-    img = cv2.fastNlMeansDenoisingColored(img,None,20,10,7,21)
+    #img = cv2.fastNlMeansDenoisingColored(img,None,20,10,7,21)
     
     return img
 
