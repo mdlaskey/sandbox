@@ -37,14 +37,14 @@ class RotatingTable(Framework):
 		box = b2FixtureDef(shape=b2PolygonShape(box=(0.5,0.5)), density=5, friction=0.2)
 
 		# inside_table = [(x,y) for x in range(0,30) for y in range(15,30)]
-		inside_table = [(x, y) for x in range(-11,11) for y in range(0,30)]
+		inside_table = [(x, y) for x in range(-8,8) for y in range(0,30)]
 		random.shuffle(inside_table)
 
 		self.bodies = [self.world.CreateDynamicBody(position=pos, fixtures=box) for pos in inside_table[:10]]
 
 	def rotate_cw(self, body):
 		box = b2FixtureDef(shape=b2PolygonShape(box=(0.5,0.5)), density=5, friction=0.2)
-		theta = math.radians(3.0)
+		theta = math.radians(-3.0)
 		rotation_matrix = np.asmatrix([[math.cos(theta), -1*math.sin(theta)],
 						   			   [math.sin(theta), math.cos(theta)   ]])
 		new_body_position = rotation_matrix * (np.asmatrix(body.position) - np.asmatrix(self.center_pos_)).T + np.asmatrix(self.center_pos_).T
@@ -53,8 +53,8 @@ class RotatingTable(Framework):
 
 	def rotate_ccw(self, body):
 		box = b2FixtureDef(shape=b2PolygonShape(box=(0.5,0.5)), density=5, friction=0.2)
-		theta = 3.0
-		rotation_matrix = -1 * np.asmatrix([[math.cos(theta), -1*math.sin(theta)],
+		theta = math.radians(3.0)
+		rotation_matrix = np.asmatrix([[math.cos(theta), -1*math.sin(theta)],
 						   			   		[math.sin(theta), math.cos(theta)   ]])
 		new_body_position = rotation_matrix * (np.asmatrix(body.position) - np.asmatrix(self.center_pos_)).T + np.asmatrix(self.center_pos_).T
 		new_body_position = np.ravel(new_body_position.T)
@@ -82,9 +82,9 @@ class RotatingTable(Framework):
 		self.bodies = new_bodies
 
 	def Keyboard(self, key):
-		if key==Keys.K_w:
+		if key==Keys.K_s:
 			self.rotate_cw_all()
-		elif key==Keys.K_s:
+		elif key==Keys.K_w:
 			self.rotate_ccw_all()
 
 
