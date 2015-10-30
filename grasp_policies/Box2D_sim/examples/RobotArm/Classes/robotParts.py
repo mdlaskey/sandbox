@@ -49,7 +49,7 @@ class RobotGripper:
         self.x = w/2.0 + ((self.lengthPalm-w)/2.0 - w_small) + w_small/2.0
         y = 8*h/2.0 + w_small + h_small/2.0
         transform.position = (-self.x, y)
-        print(transform.position)
+
         self.gripperLeft_ = Polygon(vertices, transform)
 
         # Gripper Right
