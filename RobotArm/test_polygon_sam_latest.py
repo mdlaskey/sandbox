@@ -26,6 +26,7 @@ Author: Sam Staszak
 """
 from framework import *
 from xbox_controller import *
+from keyboard_controller import *
 import sklearn
 import math
 import numpy as np
@@ -704,7 +705,7 @@ class GraspingWorld(Framework):
     #description=""
     hz=4
     zeta=0.7
-    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None):
+    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None, controller='keyboard'):
         super(GraspingWorld, self).__init__(gravity = (0,0))
         
         self.contactPoints = []
@@ -744,7 +745,10 @@ class GraspingWorld(Framework):
             self.states = np.array([self.initState])
             self.generateBoxes(self.numBoxes)
             if self.label:
-                self.xboxController = XboxController(.04)
+                if controller == 'keyboard':
+                    self.input_controller = Keyboard_Controller()
+                elif controller == 'xbox':
+                    self.input_controller = xbox_controller(.04)
                 inputs = self.getUserInput()
                 self.inputs = np.array([inputs[0][0], inputs[0][1],
                                         inputs[1], inputs[2]])
@@ -756,10 +760,10 @@ class GraspingWorld(Framework):
             if self.rollout:
                 self.policyInputs = self.getControlFromPolicy()
             else:
-                self.xboxController = XboxController(.04)
-                inputs = self.getUserInput()
-                self.inputs = np.array([inputs[0][0], inputs[0][1],
-                                        inputs[1], inputs[2]])
+                if controller == 'keyboard':
+                    self.input_controller = Keyboard_Controller()
+                elif controller == 'xbox':
+                    self.input_controller = xbox_controller(.04)
 
     def reset(self):
         '''self.wait = True
@@ -768,7 +772,7 @@ class GraspingWorld(Framework):
         self.factory.resetBoxes(self.world)'''
 
         pygame.joystick.quit()
-        self.xboxController = None
+        self.input_controller = None
         self.world.destructionListener=None
         self.world.contactListener = None
         self.world.renderer=None
@@ -833,7 +837,7 @@ class GraspingWorld(Framework):
 
     def getUserInput(self):
         pygame.event.clear()
-        state = self.xboxController.getControllerState()
+        state = self.input_controller.getControllerState()
         if state != None:
             userInput = np.array([state['right_stick'],
                                   state['right_trigger'],
@@ -1081,7 +1085,7 @@ class GraspingWorld(Framework):
                     self.getControlInput()
                     self.policyInputs = self.getControlFromPolicy()
                 else:
-                    self.xboxController = XboxController(.04)
+                    self.input_controller = input_controller(.04)
                     self.inputs = self.getUserInput()
 
                     self.states = self.getState()

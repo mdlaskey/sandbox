@@ -120,6 +120,7 @@ def labelPolicy(pInputs, initState):
             
 
 def run():
+    print main
     learner.initModel(useSHIV)
     end = False
     train()
