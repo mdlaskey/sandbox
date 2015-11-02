@@ -53,7 +53,7 @@ class OneArmedRobot:
 
 		# Make another stationary arm, attached it to the other end of the moving arm
 		extension_length = 1.0
-		extension_width = 10.0
+		extension_width = 6.0
 
 		vertices = [(0.0,0.0), (extension_length,0.0), (extension_length, extension_width), (0.0, extension_width)]
 		extension_transform = b2Transform()
@@ -62,7 +62,7 @@ class OneArmedRobot:
 		self.extension_arm_ = Polygon(vertices, extension_transform)
 
 		# Make robot gripper
-		self.gripper_ = RobotGripper(self.transform_, rotation_center[1], 4.0)
+		self.gripper_ = RobotGripper(self.transform_, 7.5, 1.5)
 
 		# Make robot prismatic joint
 		# axis --> movement in which direction (0,1) means in y-direction(initially)
