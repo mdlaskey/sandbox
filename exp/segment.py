@@ -55,15 +55,16 @@ while 1:
     for i in range(np.shape(frame)[0]):
         for j in range(np.shape(frame)[1]):
             if abs(dist((j, i), maxRedLoc) - d) < 10:                   # 10 is the tolerance
-                frame = mapRange(frame, (0,0,0), (100, 100, 100), (50, 180, 50), (j, i))     # range for determining the dark values in the ring,  map to a green
+                frame = mapRange(frame, (0,0,0), (130, 130, 130), (120, 180, 120), (j, i))     # range for determining the dark values in the ring,  map to a green
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_green = np.array([30,10,0])
-    upper_green = np.array([90,255,225])
+    upper_green = np.array([70,140,180])
     mask = cv2.inRange(hsv, lower_green, upper_green)
     mask = 255 - mask
     mask_b = cv2.medianBlur(mask,7)
 
     cv2.imshow('original', frame)
+    cv2.imshow('mask', mask)
     cv2.imshow('hsv', hsv)
     cv2.imshow("preview", mask_b)
     key = cv2.waitKey(20)

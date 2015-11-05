@@ -49,7 +49,8 @@ else:
 rval, frame = vc.read()
 
 # crop frame
-frame = frame[0+const.OFFSET_Y:const.HEIGHT+const.OFFSET_Y, 0+const.OFFSET_X:const.WIDTH+const.OFFSET_X]
+
+frame = frame[0+const.OFFSET_Y:const.HEIGHT+const.OFFSET_Y, 0+const.OFFSET_X:const.WIDTH+const.OFFSET_X]    
 blue, green, red = cv2.split(frame)
 
 # identify the marker in the middle of the circle (may not be perfect)

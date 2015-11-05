@@ -36,8 +36,8 @@ while 1:
 	cv2.imshow("preview", frame)
 	cv2.imshow("bit",mask)
 	cv2.imshow("bit_m",mask_b)
-        #vw.write(cv2.cvtColor(mask_b,cv2.COLOR_GRAY2RGB))
-        #previewwriter.write(frame)
+        vw.write(cv2.cvtColor(mask_b,cv2.COLOR_GRAY2RGB))
+        previewwriter.write(frame)
 	rval, frame = vc.read()
 	key = cv2.waitKey(20)
 	if key == 27: # exit on ESC
