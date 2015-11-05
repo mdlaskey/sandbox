@@ -24,13 +24,13 @@ def mapRange(map, lower, upper, loc):
     blueLow, greenLow, redLow = lower
     blueUp, greenUp, redUp = upper
     
-    if blueLow < blue \
-            and blueUp > blue \
-            and redLow < red \
-            and redUp > red \
-            and greenLow < green \
-            and greenUp > green:
-        map[y, x] = 50, 180, 50
+    if blueLow <= blue \
+            and blueUp >= blue \
+            and redLow <= red \
+            and redUp >= red \
+            and greenLow <= green \
+            and greenUp >= green:
+        map[y, x] = (120, 180, 120)
     return map
 
 """
@@ -72,15 +72,22 @@ im = im[0+OFFSET_Y:250+OFFSET_Y, 0+OFFSET_X:250+OFFSET_X]
 
 # process those pixels within the circle
 # and map when within a specific range (dark colors)
-for i in range(np.shape(res)[0]):
+"""for i in range(np.shape(res)[0]):
     for j in range(np.shape(res)[1]):
+        if abs(dist((j, i), maxRedLoc) - d) < 10:
+            im = mapRange(im, (0,0,0), (100, 100, 100), (j, i))
+"""
+print maxRedLoc[0] - d, maxRedLoc[0] + d
+print maxRedLoc[1] - d, maxRedLoc[1] + d
+for i in range(int(maxRedLoc[1] - d -2), int(maxRedLoc[1] + d + 5), 2):
+    for j in range(int(maxRedLoc[0] - d-2), int(maxRedLoc[0] + d + 5), 2):
         if abs(dist((j, i), maxRedLoc) - d) < 10:
             im = mapRange(im, (0,0,0), (100, 100, 100), (j, i))
 
 
 hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-lower_green = np.array([30,10,0])
-upper_green = np.array([90,255,225])
+lower_green = np.array([30,10,10])
+upper_green = np.array([60,88,180])
 mask = cv2.inRange(hsv, lower_green, upper_green)
 mask = 255 - mask
 mask_b = cv2.medianBlur(mask,7)

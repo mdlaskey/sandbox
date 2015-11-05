@@ -1,11 +1,15 @@
 import cv2
 import numpy as np
-import const
+from utilities import const
 
 # returns distance between loc1 and loc2
 # locs - two-element tuples of integers x,y
 def dist(loc1, loc2):
-    return ((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)**(1.0/2.0)
+    dist_squared(loc1, loc2)**(1.0/2.0)
+
+def dist_squared(loc1, loc2):
+    ((loc1[0] - loc2[0])*(loc1[0] - loc2[0]) + (loc1[1] - loc2[1])*(loc1[1] - loc2[1]))
+    
 
 # Given a point, maps pixel to val if in range
 # map - image
@@ -46,17 +50,26 @@ x = 10
 y = 20
 maxRedLoc = [int(x) for x in f.readline().split(',') ]
 d = int(float(f.readline()))
+d_squared = d * d
 f.close()
 
 
 while 1:
+
     rval, frame = vc.read()
     frame = frame[0+const.OFFSET_Y:const.HEIGHT+const.OFFSET_Y, 0+const.OFFSET_X:const.WIDTH+const.OFFSET_X]
+    
+    # identify the black ring around disk
+    # TODO optimize by ignoring areas that are clearly not the disc (well outside the distance)
     for i in range(np.shape(frame)[0]):
         for j in range(np.shape(frame)[1]):
-            if abs(dist((j, i), maxRedLoc) - d) < 10:                   # 10 is the tolerance
+            if abs(dist_squared((j, i), maxRedLoc) - d_squared) < 10:                   # 10 is the fault tolerance
                 frame = mapRange(frame, (0,0,0), (130, 130, 130), (120, 180, 120), (j, i))     # range for determining the dark values in the ring,  map to a green
+    
+    # convert to hsv
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    
+    # apply range threshold to entire image
     lower_green = np.array([30,10,0])
     upper_green = np.array([70,140,180])
     mask = cv2.inRange(hsv, lower_green, upper_green)

@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import const
+from utilities import const
 
 # returns distance between loc1 and loc2
 # locs - two-element tuples of integers x,y
