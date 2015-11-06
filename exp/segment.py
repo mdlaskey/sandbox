@@ -1,15 +1,16 @@
 import cv2
 import numpy as np
-from utilities import const
+from utilities import const, recorder
 
 # returns distance between loc1 and loc2
 # locs - two-element tuples of integers x,y
 def dist(loc1, loc2):
-    dist_squared(loc1, loc2)**(1.0/2.0)
+    return ((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)**(1.0/2.0)
 
 def dist_squared(loc1, loc2):
-    ((loc1[0] - loc2[0])*(loc1[0] - loc2[0]) + (loc1[1] - loc2[1])*(loc1[1] - loc2[1]))
-    
+    diffx = loc1[0] - loc2[0]
+    diffy = loc1[1] - loc2[1]
+    return diffx * diffx + diffy * diffy 
 
 # Given a point, maps pixel to val if in range
 # map - image
@@ -17,20 +18,23 @@ def dist_squared(loc1, loc2):
 # upper - 3 tuple upper bound
 # val - value to replace if in range
 # loc - location of pixel x,y
-def mapRange(map, lower, upper, val, loc):
+def mapRange(map, loc):
     x, y = loc
     blue, green, red = map[y, x]
-    blueLow, greenLow, redLow = lower
-    blueUp, greenUp, redUp = upper
+    blueLow, greenLow, redLow = (0,0,0)
+    blueUp, greenUp, redUp = (130, 130, 130)
     
-    if blueLow < blue \
+    if greenLow < green \
+            and greenUp > green \
+            and blueLow < blue \
             and blueUp > blue \
             and redLow < red \
-            and redUp > red \
-            and greenLow < green \
-            and greenUp > green:
-        map[y, x] = val
-    return map
+            and redUp > red:
+        ""
+        map[y, x] =  [120, 180, 120]
+        map[y+1, x] =  [120, 180, 120]
+        map[y, x+1] =  [120, 180, 120]
+        map[y+1, x+1] =  [120, 180, 120]
 
 
 # Setting up video capture
@@ -53,6 +57,12 @@ d = int(float(f.readline()))
 d_squared = d * d
 f.close()
 
+tolerance = 2000
+
+rec = recorder.generate((const.HEIGHT, const.WIDTH))
+
+lower_green = np.array([30,10,0])
+upper_green = np.array([70,140,180])
 
 while 1:
 
@@ -61,27 +71,28 @@ while 1:
     
     # identify the black ring around disk
     # TODO optimize by ignoring areas that are clearly not the disc (well outside the distance)
-    for i in range(np.shape(frame)[0]):
-        for j in range(np.shape(frame)[1]):
-            if abs(dist_squared((j, i), maxRedLoc) - d_squared) < 10:                   # 10 is the fault tolerance
-                frame = mapRange(frame, (0,0,0), (130, 130, 130), (120, 180, 120), (j, i))     # range for determining the dark values in the ring,  map to a green
+    for i in range( int(maxRedLoc[1] - 2*d), int(maxRedLoc[1] + 2*d), 2 ):
+        for j in range( int(maxRedLoc[0] - 2*d), int(maxRedLoc[0] + 2*d), 2 ):
+            if abs(dist_squared((j, i), maxRedLoc) - d_squared) < 2000:        # 2000 is fault tolerance
+                mapRange(frame, (j, i))     # range for determining the dark values in the ring,  map to a green
     
     # convert to hsv
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
     # apply range threshold to entire image
-    lower_green = np.array([30,10,0])
-    upper_green = np.array([70,140,180])
     mask = cv2.inRange(hsv, lower_green, upper_green)
     mask = 255 - mask
-    mask_b = cv2.medianBlur(mask,7)
+    mask_b = cv2.medianBlur(mask,9)
 
     cv2.imshow('original', frame)
-    cv2.imshow('mask', mask)
-    cv2.imshow('hsv', hsv)
+    #cv2.imshow('hsv', hsv)
+    #cv2.imshow('mask', mask)    
     cv2.imshow("preview", mask_b)
+    #rec.write(cv2.cvtColor(mask_b, cv2.COLOR_GRAY2BGR))
+    #cv2.imwrite('sample.jpg', mask_b)
     key = cv2.waitKey(20)
     if key == 27:
         break
 
+rec.release()
 cv2.destroyAllWindows()
