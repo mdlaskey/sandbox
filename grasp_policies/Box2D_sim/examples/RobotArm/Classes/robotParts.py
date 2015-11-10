@@ -17,47 +17,66 @@ import IPython
 
 
 class RobotGripper:
-    def __init__(self, transform, height, width):
+    def __init__(self, transform, height, width, scale):
         self.transform_ = transform
         self.transform_ = b2Transform()
         self.transform_.angle = transform.angle
 
-        self.h_ = height
-        self.w_ = width
+        self.h_ = height * scale
+        self.w_ = width * scale
         h = self.h_
         w = self.w_
-        w_small = w/3.0
-        h_small = h/2.5
+        w_gripper = w
+        h_gripper = h * 2.0/3.0
 
-        self.lengthPalm = h/1.3
+        # self.h_ = height
+        # self.w_ = width
+        # h = self.h_
+        # w = self.w_
+        # # w_small = w/3.0
+        # # h_small = h/2.5
+        # w_small = 1.9
+        # h_small = 
 
-        self.transform_.position = (0, 8*h/2.0 + w_small/2.0)
+
+        # self.lengthPalm = 1.53
+        # self.heightPalm = 1.67
+
+        self.lengthPalm = w / 2.0
+        self.heightPalm = self.lengthPalm
+
+        self.transform_.position = (transform.position[0], 8*h/2.0 + w_small/2.0)
         
         # Gripper Palm
-        vertices = vertices=[(0,0),(self.lengthPalm,0),(self.lengthPalm,w_small),(0,w_small)]
+        vertices = vertices=[(0,0),(self.lengthPalm,0),(self.lengthPalm, self.heightPalm),(0, self.heightPalm)]
         transform = b2Transform()
         transform.angle = self.transform_.angle 
         # position = (0, 28.4167)
-        transform.position = (0, 8*h/2.0 + w_small/2.0)
+        transform.position = (self.transform_.position[0], self.transform_.position[1])
         self.gripperPalm_ = Polygon(vertices, transform)
 
         # Gripper Left
         vertices = vertices=[(0,0),(w_small,0),(w_small,h_small),(0,h_small)]
+        # # Make a right triangular gripper 
+        # vertices = [(0,0), (-w_small,0), (0, h_small)]
         transform = b2Transform()
         transform.angle = self.transform_.angle 
         # position = (-3, 27.25)
         self.x = w/2.0 + ((self.lengthPalm-w)/2.0 - w_small) + w_small/2.0
         y = 8*h/2.0 + w_small + h_small/2.0
-        transform.position = (-self.x, y)
+        transform.position = (self.transform_.position[0]-self.x, y)
 
         self.gripperLeft_ = Polygon(vertices, transform)
 
         # Gripper Right
+        # # Make a rectangular gripper
         vertices = vertices=[(0,0),(w_small,0),(w_small,h_small),(0,h_small)]
+        # Make a right triangular gripper
+        vertices = [(0,0), (2,0), (0, 4)]
         transform = b2Transform()
         transform.angle = self.transform_.angle
         # position = (2.75, 27.25)
-        transform.position = (self.x, y)
+        transform.position = (self.transform_.position[0]+self.x, y)
         self.gripperRight_ = Polygon(vertices, transform)
 
 

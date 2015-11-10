@@ -15,15 +15,15 @@ class RotatingTable(Framework):
 		# Set the gravity to be 0 in alll direction
 		self.world.gravity = (0,0)
 
-		self.center_pos_ = (0,15)
+		self.center_pos_ = (0,18)
 
 		self.radius = 18.0
 
 		# Build the edge of a table by connecting multiple edge lines
-		table_edge = self.world.CreateStaticBody(position=self.center_pos_)
+		table_edge = self.world.CreateStaticBody(position=(0.0,0.0))
 		
 		# Circle table
-		table_edge.CreateEdgeChain(self.makeCircleTableVertices(180))
+		table_edge.CreateEdgeChain(self.makeCircleTableVertices(4))
 
 		# Build the center of the table
 		circle = b2FixtureDef(shape=b2CircleShape(radius=0.2), friction=0.9)
@@ -45,8 +45,6 @@ class RotatingTable(Framework):
 
 		# Create the target object to the world
 		self.bodies.append(self.world.CreateDynamicBody(position=inside_table[num_obs_object], fixtures=circle_target))
-
-		print dir(self.bodies[0])
 
 	def rotate_cw(self, body):
 		fixture = b2FixtureDef(shape=body.fixtures[0].shape, density=5, friction=0.9)
@@ -120,7 +118,9 @@ class RotatingTable(Framework):
 			last_pos = vertices[-1]
 			new_vertex = rotation_matrix * (np.asmatrix(last_pos) - np.asmatrix(circle_center_pos)).T + np.asmatrix(circle_center_pos).T
 			vertices.append(tuple(np.ravel(new_vertex.T)))
-		return [(x,y - self.radius) for x,y in vertices]
+		print circle_center_pos
+		print vertices
+		return [(x,y) for x,y in vertices]
 
 	def Keyboard(self, key):
 		if key==Keys.K_s:
@@ -128,8 +128,8 @@ class RotatingTable(Framework):
 		elif key==Keys.K_w:
 			self.rotate_ccw_all()
 
-
 if __name__ == "__main__":
 	main(RotatingTable)
+
 
 

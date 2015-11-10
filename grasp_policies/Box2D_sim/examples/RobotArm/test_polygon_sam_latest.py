@@ -573,7 +573,7 @@ class GraspingWorld(Framework):
 
 
 
-'''if __name__=="__main__":
-     main(Grasping)'''
+if __name__=="__main__":
+     main(GraspingWorld)
      
      

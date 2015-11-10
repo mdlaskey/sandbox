@@ -874,7 +874,7 @@ class PolygonDemo(Framework):
 
 
 
-'''if __name__=="__main__":
-     main(PolygonDemo)'''
+if __name__=="__main__":
+     main(PolygonDemo)
      
      

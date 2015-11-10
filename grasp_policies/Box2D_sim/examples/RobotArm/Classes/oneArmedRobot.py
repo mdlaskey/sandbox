@@ -11,7 +11,7 @@ from Classes.robotParts import Polygon
 
 class OneArmedRobot:
 
-	def __init__(self, transform):
+	def __init__(self, transform, scale):
 		# Set up the width and height of polygon resembling the arm
 		self.length_ = 4.0
 		self.height_ = 4.0
@@ -19,7 +19,7 @@ class OneArmedRobot:
 		self.transform_ = transform
 		# self.transform_ = b2Transform()
 		self.transform_.angle = 0.0
-		rotation_center = (0.0, 8.0)
+		rotation_center = (5.0, 8.0)
 		self.transform_.position = rotation_center
 
 		# Make an (supposedly) invisible rotational panel as Polygon
@@ -30,16 +30,6 @@ class OneArmedRobot:
 		rotating_panel_transform.position = self.transform_.position
 		self.rotating_panel_ = Polygon(radius=rotating_radius, transform = rotating_panel_transform)
 
-		# Make stationary arm as a polygon
-		# stationary_length = 1.0
-		# stationary_width = 3.0
-
-		# vertices = [(0.0,0.0), (stationary_length,0.0), (stationary_length, stationary_width), (0.0, stationary_width)]
-		# stationary_transform = b2Transform()
-		# stationary_transform.angle = self.transform_.angle
-		# stationary_transform.position = (rotation_center[0], rotation_center[1] + 11.0)
-		# self.stationary_arm_ = Polygon(vertices, stationary_transform)
-
 		# Make moving arm as a polygon
 		moving_length = 0.5
 		moving_width = 7.0
@@ -47,7 +37,7 @@ class OneArmedRobot:
 		vertices = [(0.0,0.0), (moving_length,0.0), (moving_length, moving_width), (0.0, moving_width)]
 		moving_transform = b2Transform()
 		moving_transform.angle = self.transform_.angle
-		moving_transform.position = (rotation_center[0] + 1.0, rotation_center[1] + 11.0)
+		moving_transform.position = (rotation_center[0] * 2 + 1.0, rotation_center[1] + 11.0)
 		# moving_transform.position = (stationary_transform.position[0] + stationary_length, stationary_transform.position[1] + stationary_width / 2.0 + 2.0)
 		self.moving_arm_ = Polygon(vertices, moving_transform)
 
@@ -62,11 +52,13 @@ class OneArmedRobot:
 		self.extension_arm_ = Polygon(vertices, extension_transform)
 
 		# Make robot gripper
-		self.gripper_ = RobotGripper(self.transform_, 7.5, 1.5)
+		self.transform_.position = (rotation_center[0] * 2, rotation_center[1])
+		# print self.transform_.position[1]
+		self.gripper_ = RobotGripper(self.transform_, 8.7, 5.5, scale)
 
 		# Make robot prismatic joint
 		# axis --> movement in which direction (0,1) means in y-direction(initially)
-		self.prismatic_joint_ = RobotPrismaticJoint(axis=(0,1), motor_force=0.0, upper_translation = 5.0)
+		self.prismatic_joint_ = RobotPrismaticJoint(axis=(0,1), motor_force=0.0, upper_translation = 5.0, enable_limit=True)
 
 		# Make the rotational joint
 		self.rotational_joint_ = RobotRevoluteJoint(anchor= 2 * self.rotating_panel_.transform_.position ,limit_enabled=False)
@@ -81,9 +73,6 @@ class OneArmedRobot:
 
 		# Connect the rotating panel with the stationary arm using revolute joint
 		rotational_joint = self.rotational_joint_.addToWorld(world, self.rotating_panel_, self.moving_arm_)
-
-		# Connect the stationary arm with moving arm using prismatic joint
-		# prismatic_joint = self.prismatic_joint_.addToWorld(world, moving_arm, stationary_arm)
 
 		# Connect the extension arm with moving arm using prismatic joint
 		extension_joint = self.prismatic_joint_.addToWorld(world, extension_arm, moving_arm)
