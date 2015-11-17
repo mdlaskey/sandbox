@@ -203,16 +203,16 @@ class RotatingTable(Framework):
 		Add the physical bodies of all the obstacle objects and target objects to the world where this object is
 		instantiated
 		"""
+
 		# Build the obstruction objects in the table
-		box = b2FixtureDef(shape=b2PolygonShape(box=(1.0,1.0)), density=5, friction=0.9)
+		box = b2FixtureDef(shape=b2PolygonShape(box=(1.1,1.1)), density=5, friction=0.9)
 
 		# Build the target object in the table
-		circle_target = b2FixtureDef(shape=b2CircleShape(radius=1.0))
+		circle_target = b2FixtureDef(shape=b2CircleShape(radius=1.1))
 
 		# inside_table = [(x,y) for x in range(0,30) for y in range(15,30)]
-		inside_table = [(x, y) for x in range(int(self.center_pos_[0] - self.radius_ / 2), int(self.center_pos_[0] + self.radius_ / 2)) for y in range(int(self.center_pos_[1] - self.radius_), int(self.center_pos_[1] + self.radius_))]
-		random.shuffle(inside_table)
-
+		# inside_table = [(x, y) for x in range(int(self.center_pos_[0] - self.radius_ / 2.5), int(self.center_pos_[0] + self.radius_ / 2.5)) for y in range(int(self.center_pos_[1] - self.radius_), int(self.center_pos_[1] + self.radius_))]
+		inside_table = [(np.random.normal(loc=self.center_pos_[0],scale=self.radius_/3.0), np.random.normal(loc=self.center_pos_[1],scale=self.radius_/3.0)) for _ in range(self.num_obs_object_+1)]
 		# Create the obstruction object to the world
 		self.bodies = [self.parent_world_.CreateDynamicBody(position=pos,
 															fixtures=box,

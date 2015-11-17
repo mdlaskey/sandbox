@@ -133,6 +133,7 @@ def run():
             end = labelPolicy(inpts, initState)
     np.save(rF, results)
     learner.saveModel()
+    print "status : finish"
         
 
 def train():

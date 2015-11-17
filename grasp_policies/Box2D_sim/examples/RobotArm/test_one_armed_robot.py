@@ -37,6 +37,7 @@ import time
 import cv2
 import IPython
 import random
+import shutil
 
 class BoxFactory:
     def __init__(self):
@@ -133,8 +134,22 @@ class GraspingWorld(Framework):
     #description=""
     hz=4
     zeta=0.7
+    if os.path.exists('./training_image/'):
+        shutil.rmtree('./training_image')
+    os.mkdir('./training_image')
+
     def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None):
         super(GraspingWorld, self).__init__(gravity = (0,0))
+
+        # The size of which the video will be recorded
+        self.start_w_ = 80
+        self.end_w_ = 240
+        self.start_h_ = 150
+        self.end_h_ = 320
+
+        # Start a video frame
+        self.video_bw_ = None
+        self.video_c_ = None
         
         self.contactPoints = []
         self.outOfBounds = []
@@ -150,7 +165,7 @@ class GraspingWorld(Framework):
         transform.position = (0, 0)
 
         # self.initJointAngles = [0.0,0.0,0.0]
-        self.arm = OneArmedRobot(transform, 2.0/3.0)
+        self.arm = OneArmedRobot(transform, scale=4.0/3.0)
         self.arm.addToWorld(self.world)
         self.gripper = self.arm.getGripper()
 
@@ -161,7 +176,7 @@ class GraspingWorld(Framework):
         #print(str(self.startPos))
         self.end = EndEffector(transform, self.startPos, 0.0)
         
-        self.table = RotatingTable(offset= -10, center=15.0, radius=12.0, world=self.world)
+        self.table = RotatingTable(offset= -10, center=10.0, radius=12.0, world=self.world)
         self.table.addToWorld()
         self.i = 0
         # self.numBoxes = 5
@@ -364,12 +379,47 @@ class GraspingWorld(Framework):
         return newInput
 
     def getImg(self, state):
-        img = cv2.pyrDown((cv2.pyrDown(state)))
-        self.Print(str(self.i))
-        #newSurface = pygame.surfarray.make_surface(img)
+        img = cv2.pyrDown(state)
+        (rows, cols, rgb) = img.shape
+
+        # Rotate the image by 90 degrees
+        M_rotate = cv2.getRotationMatrix2D((rows/2, rows/2), -90, 1)
+        rotated_img = cv2.warpAffine(img, M_rotate, (rows, cols))
+
+        # Make it into black and white image
+        gray_img = cv2.cvtColor(rotated_img, cv2.COLOR_BGR2GRAY)
+        thres, bw_rotated_img = cv2.threshold(gray_img, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        # Crop the image (erase the text on top right)
+        final_img = bw_rotated_img[self.start_w_:self.end_w_, self.start_h_:self.end_h_]
+        
+        final_img = cv2.cvtColor(final_img, cv2.COLOR_GRAY2RGB)
+        cv2.imwrite('./training_image/cropped_img.png', final_img)
+
+        final_img = cv2.imread('./training_image/cropped_img.png', 1)
+        # final_img = cv2.cvtColor(final_img, cv2.COLOR_GRAY2RGB)
+        if self.video_c_ is None:
+            width, height = rotated_img.shape[0], rotated_img.shape[1]
+            fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')
+            self.video_c_ = cv2.VideoWriter()
+            success = self.video_c_.open('./training_image/zek_sim_c.mov', fourcc, 20.0, (height, width))
+        if self.video_bw_ is None:
+            width, height = final_img.shape[0], final_img.shape[1]
+            fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')         
+            self.video_bw_ = cv2.VideoWriter()
+            success = self.video_bw_.open('./training_image/zek_sim_bw.mov', fourcc, 20.0, (height, width))
+        self.video_bw_.write(final_img)
+        self.video_c_.write(rotated_img)
+        # cv2.imwrite('./training_image/cropped_img_' + str(self.i) + '.png', final_img)
+
+
+        # newSurface = pygame.surfarray.make_surface(img)
+        # cv2.imwrite('bw_new_surf.png', newSurface)
         #save_path = '/home/staszass/sandbox/grasp_policies/Box2D_sim/examples/Images/'
         #filename = os.path.join(save_path, "image"+str(self.i)+".png")
         #pygame.image.save(newSurface,filename)
+
+        # Extract Feature using HOG Features
         winSize = (32,32)
         blockSize = (16,16)
         blockStride = (8,8)
@@ -385,7 +435,7 @@ class GraspingWorld(Framework):
                                     histogramNormType,L2HysThreshold,gammaCorrection,nlevels)
 
         state = hog.compute(img)
-        
+        # cv2.imwrite('bw_sim.png', state)
         f = open('test.txt', 'w')
         f.write(str(state))
         self.Print(str(state.shape))
@@ -489,7 +539,9 @@ class GraspingWorld(Framework):
         super(GraspingWorld, self).Step(settings)
         #self.Print("frequency = %g hz, damping ratio = %g" % (self.hz, self.zeta))
         js = self.arm.update()
-        self.drawTable()
+
+        # Uncomment this if you want to show the visual table
+        # self.drawTable()
 
         #self.isTargetCaged()
         #self.Print(str(len(self.outOfBounds)))
@@ -569,8 +621,8 @@ class GraspingWorld(Framework):
         #     self.storeInput(userInput)
 
         # #print(str(self.getStateObjects()))
-        # #state = pygame.surfarray.array3d(self.renderer.surface)
-        # #self.getImg(state)
+        state = pygame.surfarray.array3d(self.renderer.surface)
+        self.getImg(state)
 
         self.i+=1
 

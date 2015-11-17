@@ -26,8 +26,8 @@ class RobotGripper:
         self.w_ = width * scale
         h = self.h_
         w = self.w_
-        w_gripper = w
-        h_gripper = h * 2.0/3.0
+        w_small = w * 1.0/3.0
+        h_small = h * 2.0/3.0
 
         # self.h_ = height
         # self.w_ = width
@@ -42,10 +42,10 @@ class RobotGripper:
         # self.lengthPalm = 1.53
         # self.heightPalm = 1.67
 
-        self.lengthPalm = w / 2.0
-        self.heightPalm = self.lengthPalm
+        self.lengthPalm = w / 2.0 + 1.0
+        self.heightPalm = w / 2.0
 
-        self.transform_.position = (transform.position[0], 8*h/2.0 + w_small/2.0)
+        self.transform_.position = (transform.position[0], 3.9*h/2.0)
         
         # Gripper Palm
         vertices = vertices=[(0,0),(self.lengthPalm,0),(self.lengthPalm, self.heightPalm),(0, self.heightPalm)]
@@ -56,23 +56,23 @@ class RobotGripper:
         self.gripperPalm_ = Polygon(vertices, transform)
 
         # Gripper Left
-        vertices = vertices=[(0,0),(w_small,0),(w_small,h_small),(0,h_small)]
+        vertices = vertices=[(0,0),(-w_small,0),(0,h_small)]
         # # Make a right triangular gripper 
         # vertices = [(0,0), (-w_small,0), (0, h_small)]
         transform = b2Transform()
         transform.angle = self.transform_.angle 
         # position = (-3, 27.25)
-        self.x = w/2.0 + ((self.lengthPalm-w)/2.0 - w_small) + w_small/2.0
-        y = 8*h/2.0 + w_small + h_small/2.0
+        self.x = w * 1.0/3.0
+        y = 3.9*h/2.0 + w_small + 2.0
         transform.position = (self.transform_.position[0]-self.x, y)
 
         self.gripperLeft_ = Polygon(vertices, transform)
 
         # Gripper Right
         # # Make a rectangular gripper
-        vertices = vertices=[(0,0),(w_small,0),(w_small,h_small),(0,h_small)]
+        vertices = vertices=[(0,0),(w_small,0),(0,h_small)]
         # Make a right triangular gripper
-        vertices = [(0,0), (2,0), (0, 4)]
+        # vertices = [(0,0), (2,0), (0, 4)]
         transform = b2Transform()
         transform.angle = self.transform_.angle
         # position = (2.75, 27.25)
@@ -81,10 +81,10 @@ class RobotGripper:
 
 
         self.jointLeft_ = RobotPrismaticJoint(axis=(1,0), lower_translation=0.0, 
-                                              upper_translation=self.lengthPalm-3*w_small/2.0,
+                                              upper_translation=self.lengthPalm,
                                               motor_force=90.0, enable_motor=True)
         self.jointRight_ = RobotPrismaticJoint(axis=(1,0), 
-                                               lower_translation=-(self.lengthPalm-3*w_small/2.0),
+                                               lower_translation=-(self.lengthPalm),
                                                upper_translation=0.0, motor_force=90.0,
                                                enable_motor=True)
 
@@ -223,7 +223,7 @@ class RobotRevoluteJoint:
 class RobotPrismaticJoint():
     def __init__(self, axis=(1,0), lower_translation=0.0, upper_translation=0.0,
                  enable_limit=True, motor_force=0.0, enable_motor=True, roc=0.03,
-                 gripper_state=0.0):
+                 gripper_state=0.0, limit=None):
         self.axis_ = axis
         self.lowerTranslation_ = lower_translation
         self.upperTranslation_ = upper_translation
@@ -232,6 +232,7 @@ class RobotPrismaticJoint():
         self.enableMotor_ = enable_motor
         self.roc = roc
         self.controller_= PController()
+        self.limit_ = limit
         
         self.gripperState = gripper_state
 

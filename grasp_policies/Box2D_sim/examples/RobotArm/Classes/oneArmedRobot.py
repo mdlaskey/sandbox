@@ -19,7 +19,7 @@ class OneArmedRobot:
 		self.transform_ = transform
 		# self.transform_ = b2Transform()
 		self.transform_.angle = 0.0
-		rotation_center = (5.0, 8.0)
+		rotation_center = (5.0, 5.0)
 		self.transform_.position = rotation_center
 
 		# Make an (supposedly) invisible rotational panel as Polygon
@@ -32,23 +32,23 @@ class OneArmedRobot:
 
 		# Make moving arm as a polygon
 		moving_length = 0.5
-		moving_width = 7.0
+		moving_width = 5.0
 
 		vertices = [(0.0,0.0), (moving_length,0.0), (moving_length, moving_width), (0.0, moving_width)]
 		moving_transform = b2Transform()
 		moving_transform.angle = self.transform_.angle
-		moving_transform.position = (rotation_center[0] * 2 + 1.0, rotation_center[1] + 11.0)
+		moving_transform.position = (rotation_center[0] * 2 + 1.0, rotation_center[1] + 8.0)
 		# moving_transform.position = (stationary_transform.position[0] + stationary_length, stationary_transform.position[1] + stationary_width / 2.0 + 2.0)
 		self.moving_arm_ = Polygon(vertices, moving_transform)
 
 		# Make another stationary arm, attached it to the other end of the moving arm
 		extension_length = 1.0
-		extension_width = 6.0
+		extension_width = 4.0
 
 		vertices = [(0.0,0.0), (extension_length,0.0), (extension_length, extension_width), (0.0, extension_width)]
 		extension_transform = b2Transform()
 		extension_transform.angle = self.transform_.angle
-		extension_transform.position = (moving_transform.position[0] - extension_length, moving_transform.position[1] + moving_width/2.0 + 4.0)
+		extension_transform.position = (moving_transform.position[0] - extension_length, moving_transform.position[1] + moving_width/2.0 + 3.0)
 		self.extension_arm_ = Polygon(vertices, extension_transform)
 
 		# Make robot gripper
@@ -58,7 +58,7 @@ class OneArmedRobot:
 
 		# Make robot prismatic joint
 		# axis --> movement in which direction (0,1) means in y-direction(initially)
-		self.prismatic_joint_ = RobotPrismaticJoint(axis=(0,1), motor_force=0.0, upper_translation = 5.0, enable_limit=True)
+		self.prismatic_joint_ = RobotPrismaticJoint(axis=(0,1), motor_force=0.0, lower_translation = -10.0, upper_translation = 5.0, enable_limit=True)
 
 		# Make the rotational joint
 		self.rotational_joint_ = RobotRevoluteJoint(anchor= 2 * self.rotating_panel_.transform_.position ,limit_enabled=False)
