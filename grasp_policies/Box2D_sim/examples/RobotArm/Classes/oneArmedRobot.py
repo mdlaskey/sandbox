@@ -32,23 +32,22 @@ class OneArmedRobot:
 
 		# Make moving arm as a polygon
 		moving_length = 0.5
-		moving_width = 5.0
+		moving_width = 2.0
 
 		vertices = [(0.0,0.0), (moving_length,0.0), (moving_length, moving_width), (0.0, moving_width)]
 		moving_transform = b2Transform()
 		moving_transform.angle = self.transform_.angle
-		moving_transform.position = (rotation_center[0] * 2 + 1.0, rotation_center[1] + 8.0)
-		# moving_transform.position = (stationary_transform.position[0] + stationary_length, stationary_transform.position[1] + stationary_width / 2.0 + 2.0)
+		moving_transform.position = (rotation_center[0] * 2 + 1.0, rotation_center[1] + 5.0)
 		self.moving_arm_ = Polygon(vertices, moving_transform)
 
 		# Make another stationary arm, attached it to the other end of the moving arm
 		extension_length = 1.0
-		extension_width = 4.0
+		extension_width = 3.0
 
 		vertices = [(0.0,0.0), (extension_length,0.0), (extension_length, extension_width), (0.0, extension_width)]
 		extension_transform = b2Transform()
 		extension_transform.angle = self.transform_.angle
-		extension_transform.position = (moving_transform.position[0] - extension_length, moving_transform.position[1] + moving_width/2.0 + 3.0)
+		extension_transform.position = (moving_transform.position[0] - extension_length, moving_transform.position[1] + moving_width/2.0 + 9.0)
 		self.extension_arm_ = Polygon(vertices, extension_transform)
 
 		# Make robot gripper

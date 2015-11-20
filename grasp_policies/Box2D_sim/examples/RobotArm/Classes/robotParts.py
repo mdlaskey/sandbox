@@ -42,57 +42,119 @@ class RobotGripper:
         # self.lengthPalm = 1.53
         # self.heightPalm = 1.67
 
-        self.lengthPalm = w / 2.0 + 1.0
-        self.heightPalm = w / 2.0
+        # Try to hard code now
+        self.lengthPalm_ = 2.5 
+        self.heightPalm_ = 2.5
 
         self.transform_.position = (transform.position[0], 3.9*h/2.0)
         
         # Gripper Palm
-        vertices = vertices=[(0,0),(self.lengthPalm,0),(self.lengthPalm, self.heightPalm),(0, self.heightPalm)]
+        # Make a Base Part
+        base_length = 2.5
+        base_height = 2.0
+        vertices = [(0,0),
+                    (0, base_height),
+                    (base_length, base_height),
+                    (base_length, 0)]
         transform = b2Transform()
         transform.angle = self.transform_.angle 
-        # position = (0, 28.4167)
         transform.position = (self.transform_.position[0], self.transform_.position[1])
+        self.gripperBase_ = Polygon(vertices, transform)
+
+        # Make the additional part
+        top_length = 4.1
+        top_height = 0.5
+        vertices = [(-0.8, 0.0),
+                    (-0.8, top_height),
+                    (-0.8 + top_length, top_height),
+                    (-0.8 + top_length, 0.0)]
+        transform = b2Transform()
+        transform.angle = self.transform_.angle 
+        transform.position = (self.transform_.position[0], self.transform_.position[1] + 1.0 / 2 * base_height + 1.0/2 * top_height)
         self.gripperPalm_ = Polygon(vertices, transform)
 
+        # Add stationary joint between the base and top
+        self.jointBase_ = RobotPrismaticJoint(axis=(1,0), lower_translation=9.0, 
+                                              upper_translation=9.0,
+                                              motor_force=90.0, enable_motor=True)
+
         # Gripper Left
-        vertices = vertices=[(0,0),(-w_small,0),(0,h_small)]
-        # # Make a right triangular gripper 
-        # vertices = [(0,0), (-w_small,0), (0, h_small)]
-        transform = b2Transform()
-        transform.angle = self.transform_.angle 
-        # position = (-3, 27.25)
-        self.x = w * 1.0/3.0
-        y = 3.9*h/2.0 + w_small + 2.0
-        transform.position = (self.transform_.position[0]-self.x, y)
-
-        self.gripperLeft_ = Polygon(vertices, transform)
-
-        # Gripper Right
-        # # Make a rectangular gripper
-        vertices = vertices=[(0,0),(w_small,0),(0,h_small)]
-        # Make a right triangular gripper
-        # vertices = [(0,0), (2,0), (0, 4)]
+        # Base Finger
+        finger_base_length = 2.3
+        finger_base_height = 1.0
+        vertices = [(-finger_base_length,0),
+                    (-finger_base_length,finger_base_height),
+                    (0, finger_base_height),
+                    (0,0)]
         transform = b2Transform()
         transform.angle = self.transform_.angle
-        # position = (2.75, 27.25)
-        transform.position = (self.transform_.position[0]+self.x, y)
+        self.x = 5.5 / 2.0
+        y = self.transform_.position[1] + 1.0 / 2 * base_height + 1.0/2 * top_height + finger_base_height
+        transform.position = (self.transform_.position[0] - self.x, y)
+        self.gripperLeft_ = Polygon(vertices, transform)
+
+        # The Finger
+        finger_top_length = 1.7
+        finger_top_height = 2.1
+        vertices = [(-finger_top_length, 0), 
+                    (0, finger_top_height),
+                    (0, 0)]
+        transform = b2Transform()
+        transform.angle = self.transform_.angle
+        transform.position = (self.transform_.position[0] - self.x + 1.0 / 3 * finger_top_length, y + 2.0 / 3 * finger_top_height)
+        self.gripperFingerLeft_ = Polygon(vertices, transform)
+
+        self.jointLeftFinger_ = RobotPrismaticJoint(axis=(1,0), lower_translation=9.0, 
+                                                    upper_translation=9.0,
+                                                    motor_force=90.0, enable_motor=True)
+
+        # Gripper Right
+        # Base
+        vertices = [(0,0),
+                    (0,finger_base_height),
+                    (finger_base_length, finger_base_height),
+                    (finger_base_length,0)]
+        transform = b2Transform()
+        transform.angle = self.transform_.angle
+        transform.position = (self.transform_.position[0] + self.x, y)
         self.gripperRight_ = Polygon(vertices, transform)
+        # The Finger
+        vertices = [(0, 0), 
+                    (0, finger_top_height),
+                    (finger_top_length, 0)]
+        transform = b2Transform()
+        transform.angle = self.transform_.angle
+        transform.position = (self.transform_.position[0] + self.x - 1.0 / 3 * finger_top_length, y + 2.0 / 3 * finger_top_height)
+        self.gripperFingerRight_ = Polygon(vertices, transform)
+
+        self.jointRightFinger_ = RobotPrismaticJoint(axis=(1,0), lower_translation=9.0, 
+                                                    upper_translation=9.0,
+                                                    motor_force=90.0, enable_motor=True)
+
 
 
         self.jointLeft_ = RobotPrismaticJoint(axis=(1,0), lower_translation=0.0, 
-                                              upper_translation=self.lengthPalm,
-                                              motor_force=90.0, enable_motor=True)
+                                              upper_translation=self.lengthPalm_,
+                                              motor_force=180.0, enable_motor=True)
         self.jointRight_ = RobotPrismaticJoint(axis=(1,0), 
-                                               lower_translation=-(self.lengthPalm),
-                                               upper_translation=0.0, motor_force=90.0,
+                                               lower_translation=-(self.lengthPalm_),
+                                               upper_translation=0.0, motor_force=180.0,
                                                enable_motor=True)
 
     def addToWorld(self, world):
+        # Bring the Gripper Palm to the simulation
+        self.palmBase_ = self.gripperBase_.addToWorld(world)
         self.palm_ = self.gripperPalm_.addToWorld(world)
+        # Bring the Left Finger to the simulation
         self.left_ = self.gripperLeft_.addToWorld(world)
+        self.leftFinger_ = self.gripperFingerLeft_.addToWorld(world)
+        # Brint the Right Finger to the simulation
         self.right_ = self.gripperRight_.addToWorld(world)
+        self.rightFinger_ = self.gripperFingerRight_.addToWorld(world)
+        jointBase = self.jointBase_.addToWorld(world, self.palmBase_, self.palm_)
         jointLeft = self.jointLeft_.addToWorld(world, self.palm_, self.left_)
+        jointLeftFinger_ = self.jointLeftFinger_.addToWorld(world, self.left_, self.leftFinger_)
+        jointRightFinger_ = self.jointRightFinger_.addToWorld(world, self.right_, self.rightFinger_)
         jointRight = self.jointRight_.addToWorld(world, self.palm_, self.right_)
 
         self.body_ = world.CreateDynamicBody(
@@ -328,7 +390,7 @@ class EndEffector:
 
 class Polygon:
     def __init__(self, vertices=None, transform=b2Transform(),
-                 massDensity=0.1, friction=0.5, linearDamping=10, angularDamping=10, center=True,
+                 massDensity=0.9, friction=0.5, linearDamping=10, angularDamping=10, center=True,
                  radius=None):
         self.transform_ = transform
         self.massDensity_ = massDensity
