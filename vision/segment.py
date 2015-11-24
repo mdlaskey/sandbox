@@ -7,6 +7,7 @@ from utilities import const, recorder
 def dist(loc1, loc2):
     return ((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)**(1.0/2.0)
 
+# compute the squared distance between two locations
 def dist_squared(loc1, loc2):
     diffx = loc1[0] - loc2[0]
     diffy = loc1[1] - loc2[1]
@@ -65,6 +66,8 @@ rec = recorder.generate((const.HEIGHT, const.WIDTH))
 lower_green = np.array([30,10,0])
 upper_green = np.array([70,140,180])
 
+
+# TODO for each frame, get the controller state, learn.
 while 1:
 
     rval, frame = vc.read()
@@ -73,7 +76,7 @@ while 1:
     # identify the black ring around disk
     for i in range( int(maxRedLoc[1] - 2*d), int(maxRedLoc[1] + 2*d), 2 ):
         for j in range( int(maxRedLoc[0] - 2*d), int(maxRedLoc[0] + 2*d), 2 ):
-            if abs(dist_squared((j, i), maxRedLoc) - d_squared) < 2000:        # 2000 is fault tolerance
+            if abs(dist_squared((j, i), maxRedLoc) - d_squared) < 2000:        # 2000 is fault tolerance for squared distance around the ring
                 mapRange(frame, (j, i))                                        # range for determining the dark values in the ring,  map to a green
     
     # convert to hsv
@@ -85,6 +88,7 @@ while 1:
     mask_b = cv2.medianBlur(mask,7)
     #mask_b = cv2.pyrDown(mask_b)
 
+    # comment out imshow's to improve frame rate
     cv2.imshow('original', frame)
     #cv2.imshow('hsv', hsv)
     #cv2.imshow('mask', mask)    
@@ -94,6 +98,8 @@ while 1:
     key = cv2.waitKey(20)
     if key == 27:
         break
+
+
 
 rec.release()
 cv2.destroyAllWindows()
