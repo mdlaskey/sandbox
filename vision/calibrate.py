@@ -68,7 +68,7 @@ res = highlight(res, (0, 0, 255), maxRedLoc)
 # get the distince between the extremae
 d = dist(minGreenLoc, maxRedLoc)
 
-f = open('hyperparams.txt', 'w+')
+f = open('meta.txt', 'w+')
 f.write(str(maxRedLoc[0]) + "," + str(maxRedLoc[1]) + "\n" + str(d))
 
 cv2.imshow('frame', frame)
