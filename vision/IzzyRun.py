@@ -49,9 +49,11 @@ def directControl(test=False, deploy=False, learn=False): # use this to
         i = 0
 
         # first clear all previous data, then write over
-        open('/Users/JonathanLee/Desktop/Net/hdf/train.txt', 'w').close()
-        writer = open('/Users/JonathanLee/Desktop/Net/hdf/train.txt', 'w+')
-        
+        #open('/Users/JonathanLee/Desktop/Net/hdf/train.txt', 'w').close()
+        #writer = open('/Users/JonathanLee/Desktop/Net/hdf/train.txt', 'w+')
+        open(constants.IMAGES_TRAIN_TXT, 'w').close()
+        writer = open(constants.IMAGES_TRAIN_TXT, 'w+')
+
         while True:
             controls = c.getUpdates()     
             print controls
@@ -68,7 +70,8 @@ def directControl(test=False, deploy=False, learn=False): # use this to
             simpleControls = [controls[0], controls[2], controls[4], controls[5]]
             if not all(int(c)==0 for c in simpleControls):
                 frame = bincam.read_frame(show=False)
-                path = '/Users/JonathanLee/Desktop/sandbox/vision/Net/images_train/img_' + str(i) + '.jpg'
+                #path = '/Users/JonathanLee/Desktop/sandbox/vision/Net/images_train/img_' + str(i) + '.jpg'
+                path = constants.IMAGES_TRAIN_DIR + "img_" + str(i) + ".jpg"
                 save_example(writer, path, frame, simpleControls)
                 #cv2.imwrite(path, frame)
                 #controls_string = ""
