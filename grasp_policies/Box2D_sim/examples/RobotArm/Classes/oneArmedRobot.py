@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import time
 from framework import b2Transform
+from framework import Keys
 from Classes.robotParts import RobotPrismaticJoint
 from Classes.robotParts import RobotRevoluteJoint
 from Classes.robotParts import RobotGripper
@@ -93,6 +94,24 @@ class OneArmedRobot:
 		self.prismatic_joint_.update()
 		self.rotational_joint_.update()
 		self.gripper_.update()
+
+	def Keyboard(self, key):
+		# Control Robot Arm
+		if key == Keys.K_u:
+			v = self.extension_arm_.body_.GetWorldVector(localVector=(0,1000))
+			self.extension_arm_.body_.ApplyForce(v, self.extension_arm_.body_.worldCenter, True)
+		elif key == Keys.K_j:
+			v = self.extension_arm_.body_.GetWorldVector(localVector=(0,-1000))
+			self.extension_arm_.body_.ApplyForce(v, self.extension_arm_.body_.worldCenter, True)
+		elif key == Keys.K_h:
+			v = self.extension_arm_.body_.GetWorldVector(localVector=(-1500,0)) 
+			self.extension_arm_.body_.ApplyForce(v, self.extension_arm_.body_.worldCenter, True)
+		elif key == Keys.K_k:
+			v = self.extension_arm_.body_.GetWorldVector(localVector=(1500,0)) 
+			self.extension_arm_.body_.ApplyForce(v, self.extension_arm_.body_.worldCenter, True)
+		# Control Robot Gripper
+		self.gripper_.Keyboard(key)
+
 
     ############################# Getter Method #################################
 	def getCurrentAngles(self):

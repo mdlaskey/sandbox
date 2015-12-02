@@ -220,6 +220,7 @@ class GraspingWorld(Framework):
 
     def Keyboard(self, key):
         self.table.Keyboard(key)
+        self.arm.Keyboard(key)
         
     def generateBoxes(self, num):
         self.factory = BoxFactory()

@@ -92,7 +92,6 @@ class RobotGripper:
         y = self.transform_.position[1] + 1.0 / 2 * base_height + 1.0/2 * top_height + finger_base_height
         transform.position = (self.transform_.position[0] - self.x, y)
         self.gripperLeft_ = Polygon(vertices, transform)
-
         # The Finger
         finger_top_length = 1.7
         finger_top_height = 2.1
@@ -204,6 +203,19 @@ class RobotGripper:
                                 [0, 0, 0]]) 
 
         return parameters
+
+    def Keyboard(self, key):
+        if key == Keys.K_y:
+            leftVector = self.left_.GetWorldVector(localVector=(500,0))
+            rightVector = self.right_.GetWorldVector(localVector=(-500,0))
+            self.left_.ApplyForce(leftVector, self.left_.worldCenter, True)
+            self.right_.ApplyForce(rightVector, self.right_.worldCenter, True)
+        if key == Keys.K_i:
+            leftVector = self.left_.GetWorldVector(localVector=(-500,0))
+            rightVector = self.right_.GetWorldVector(localVector=(500,0))
+            self.left_.ApplyForce(leftVector, self.left_.worldCenter, True)
+            self.right_.ApplyForce(rightVector, self.right_.worldCenter, True)
+
 
 class PController:
     def __init__(self):
