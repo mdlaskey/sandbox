@@ -23,6 +23,20 @@ test_one_armed_robot.py
 Creates Rotating Table and Translating Robot Arm
 
 Author: Christoforus Widodo
+
+Controls :
+
+Robot Arm:
+u = elongate robot arm
+j = compress robot arm
+h = turn robot arm counter clockwise
+k = turn robot arm clockwise
+y = close gripper
+i = open gripper
+
+Rotating Table:
+w = rotate counter clockwise
+s = rotate clockwise
 """
 from framework import *
 from Classes.randController import *
