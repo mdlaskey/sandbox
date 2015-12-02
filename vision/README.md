@@ -37,7 +37,7 @@ to point to your own Net directory.
 *calibrate* and *bincam* are the important modules in the pipeline. See README in pipeline
 for instructions on *calibrate*. Calibration must occur before any video capture is used.
 
-Create an instance of a **BinaryCamera** `bincam = BinaryCamera('meta.txt') while supplying the appropriate path to the textfile metadata.
+Create an instance of a **BinaryCamera** `bincam = BinaryCamera('meta.txt')` while supplying the appropriate path to the textfile metadata.
 You should have obtained a *meta.txt* file from running *calibrate*.
 
 Now you can call instance methods **read_frame** and **read_binary_frame** which reads a cropped raw image from the video and a cropped binary segmentation respectively.
