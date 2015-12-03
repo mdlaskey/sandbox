@@ -2,3 +2,5 @@ Net/hdf/test.h5
 Net/hdf/train.h5
 *.solverstate
 *.caffemodel
+!Net/logs/*.caffemodel
+!Net/logs/*.solverstate
