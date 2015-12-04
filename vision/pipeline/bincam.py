@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from utilities import const, recorder
+import constants
 
 
 def dist(loc1, loc2):
@@ -80,7 +80,9 @@ class BinaryCamera():
         Returns cropped frame of raw video
         """
         rval, frame = self.vc.read()
-        frame = frame[0+const.OFFSET_Y:const.HEIGHT+const.OFFSET_Y, 0+const.OFFSET_X:const.WIDTH+const.OFFSET_X]
+        frame = frame[0+constants.OFFSET_Y:constants.HEIGHT+constants.OFFSET_Y, 0+constants.OFFSET_X:constants.WIDTH+constants.OFFSET_X]
+        if show:
+            cv2.imshow("preview", frame)
         return frame
         
     def read_binary_frame(self, show=False):
@@ -89,7 +91,7 @@ class BinaryCamera():
         Significantly slower than read_frame due to the pipeline.
         """
         rval, frame = self.vc.read()
-        frame = frame[0+const.OFFSET_Y:const.HEIGHT+const.OFFSET_Y, 0+const.OFFSET_X:const.WIDTH+const.OFFSET_X]        
+        frame = frame[0+constants.OFFSET_Y:constants.HEIGHT+constants.OFFSET_Y, 0+constants.OFFSET_X:constants.WIDTH+constants.OFFSET_X]        
         frame_binary = self.pipe(frame)
         
         if show:
@@ -103,8 +105,8 @@ class BinaryCamera():
         binary image of original frame. Assumes calibration
         """
         # identify black ring on table        
-        for i in range( int(self.maxRedLoc[1] - 2*self.d), int(self.maxRedLoc[1] + 2*self.d), 2 ):
-            for j in range( int(self.maxRedLoc[0] - 2*self.d), int(self.maxRedLoc[0] + 2*self.d), 2 ):
+        for i in range( int(self.maxRedLoc[1] - 2*self.d), int(self.maxRedLoc[1] + 2*self.d), 3 ):
+            for j in range( int(self.maxRedLoc[0] - 2*self.d), int(self.maxRedLoc[0] + 2*self.d), 3 ):
                 if abs(dist_squared((j, i), self.maxRedLoc) - self.d_squared) < BinaryCamera.tolerance:
                     # map dark ring to a shade of green
                     mapRange(frame, (j, i))   

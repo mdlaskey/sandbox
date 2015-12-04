@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from utilities import const, recorder
-
+from utilities import recorder
+import constants as const
 # returns distance between loc1 and loc2
 # locs - two-element tuples of integers x,y
 def dist(loc1, loc2):

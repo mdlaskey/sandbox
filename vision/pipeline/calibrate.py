@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from utilities import const
+import constants as const
 
 def dist(loc1, loc2):
     """
@@ -74,7 +74,7 @@ res = highlight(res, (0, 0, 255), maxRedLoc)
 # get the distince between the extremae
 d = dist(minGreenLoc, maxRedLoc)
 
-f = open('meta.txt', 'w')
+f = open('pipeline/meta.txt', 'w')
 f.write(str(maxRedLoc[0]) + "," + str(maxRedLoc[1]) + "\n" + str(d))
 
 cv2.imshow('frame', frame)

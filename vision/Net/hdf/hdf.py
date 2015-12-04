@@ -8,6 +8,7 @@ def reshape(img):
     """
     Given np array image in shape (width, height, channel)
     convert to same image in shape (channel, width, height) for caffe
+    Any images size is okay.
     """
     b = np.zeros((len(img[0,0,:]), len(img[0,:,0]), len(img[:,0,0])))
     b[0,:,:] = img[:,:,0]

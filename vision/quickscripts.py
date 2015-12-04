@@ -8,7 +8,7 @@ import os
 import random
 import cv2
 from pipeline import bincam
-from pipeline.utilities import const
+import constants
 
 net_path = "/Users/JonathanLee/Desktop/sandbox/vision/Net/"
 train_path = net_path + "hdf/train.txt"
@@ -76,7 +76,7 @@ def export_test():
     print len(lines)
 
 def img2bin_train():
-    bc = bincam.BinaryCamera('./pipeline/meta.txt')
+    bc = bincam.BinaryCamera('./pipeline/metax.txt')
     bc.close()
     for im_name in os.listdir(images_train_path):
         if im_name.endswith('.jpg'):
@@ -142,3 +142,23 @@ def scale_all_controls():
              controls_string += " " + str(c)
         new_line = path + controls_string + '\n'
         test.write(new_line)
+
+
+def scale_all_images():
+    images_train_path = "./Net/images_train/"
+    images_test_path = "./Net/images_test/"
+
+    images_train_x = "./Net/images_trainx/"
+    images_test_x = "./Net/images_testx/"
+    
+    for im_name in os.listdir(images_train_path):
+        path = images_train_path + im_name
+        im = cv2.imread(path)
+        im = cv2.resize(im, (125, 125))
+        cv2.imwrite(images_train_x + im_name, im)
+    for im_name in os.listdir(images_test_path):
+        path = images_test_path + im_name
+        im = cv2.imread(path)
+        im = cv2.resize(im, (125, 125))
+        cv2.imwrite(images_test_x + im_name, im)
+    
