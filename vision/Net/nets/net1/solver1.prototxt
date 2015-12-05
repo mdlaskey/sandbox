@@ -1,0 +1,22 @@
+# Location of train/test prototxt file
+net: "/Users/JonathanLee/Desktop/sandbox/vision/Net/nets/net1/trainer1.prototxt"
+
+test_iter: 1
+test_interval: 1
+#base_lr: 0.00001
+base_lr: .01
+lr_policy: "step"
+gamma: 0.00001
+stepsize: 10
+display: 1
+max_iter: 300
+# Lower momentum?
+#momentum: 0.9
+momentum: 0.9
+weight_decay: 0.0005
+
+# Number of iterations before snapshot of model is created
+snapshot: 20
+snapshot_prefix: "weights"
+# Switch to GPU for GPU mode
+solver_mode: CPU

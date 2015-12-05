@@ -28,7 +28,7 @@ def img2hdf(filename_prefix, stop=-1):
     data = parser.parse(filename_prefix + '.txt', stop)
     paths, labels = zip(*data)
     
-    images = np.array([ reshape(caffe.io.load_image(path)) for path in paths ])
+    images = np.array([ reshape(np.round(caffe.io.load_image(path), 0)) for path in paths ])
     labels = np.array(labels)
 
     f = h5py.File(filename_prefix + '.h5', 'w')    

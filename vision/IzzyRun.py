@@ -10,7 +10,7 @@ from PyControl import *
 from xboxController import *
 import numpy as np
 from pipeline.bincam import BinaryCamera
-from Net import constants
+import constants
 import cv2
 import argparse
 import caffe
@@ -20,7 +20,7 @@ import caffe
 t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
 izzy = PyControl("/dev/cu.usbmodem14111",115200, .04, [0,0,0,0,0],[0,0,0]); #same with this
 ap = argparse.ArgumentParser()
-scales = [40, 155, 120, 155, 90, 100]
+scales = [40, 120, 90, 100]
 drift = 20.0
 
 #DIRECT CONTROL
@@ -48,33 +48,26 @@ def directControl(test=False, deploy=False, learn=False): # use this to
             
     if deploy:
         frame = bincam.read_binary_frame()        
-        net = caffe.Net(constants.ROOT + 'model.prototxt', constants.ROOT + 'logs/saved/large-batch_large-gamma_500-ex/weights_iter_40.caffemodel', caffe.TEST)
+        net = caffe.Net(constants.ROOT + 'model.prototxt', constants.ROOT + '', caffe.TEST)
         while True:
-            cv2.imwrite("test.jpg", frame)
-            frame = caffe.io.load_image("test.jpg")
-            data4D = np.zeros([1, 3, 250, 250])
-            data4D[0,0,:,:] = frame[:,:,0]
-	    data4D[0,1,:,:] = frame[:,:, 1]
-	    data4D[0,2,:,:] = frame[:,:,2]
+            # bincams go from 0 to 255 in 1 dim
+            data4D = np.zeros([1, 3, 125, 125])
+            frame = frame / 255.0
+            data4D[0,0,:,:] = frame
+	    data4D[0,1,:,:] = frame
+	    data4D[0,2,:,:] = frame
             
             net.forward_all(data=data4D)
-            controls = net.blobs['tanh'].data.copy()[0]
-            print controls
+            controls = net.blobs['out'].data.copy()[0]
             
             # scale controls and squash small controls
-            for i in range(len(controls)):
-                controls[i] = scale * controls[i]
-                if controls[i] < drift:
-                    controls[i] = 0.0
-            controls = [controls[0], 0.0, controls[1], 0.0, controls[2], controls[3]]            
-            #print controls
+            controls = expand_controls(controls)
+                        
             izzy.control(controls)
             t.control([controls[5]])
             time.sleep(.05)
             frame = bincam.read_binary_frame()
             
-
-
     if learn:
         i = 0
 
@@ -98,8 +91,8 @@ def directControl(test=False, deploy=False, learn=False): # use this to
         
             # store this however you please. (concatenate into array?)
             simpleControls = [controls[0], controls[2], controls[4], controls[5]]
-            simpleControls = [ sc/scale for sc in simpleControls ]
-            if not all(int(c)==0 for c in simpleControls):
+            simpleControls = [ sc/scale for sc, scale in zip(simpleControls, scales) ]
+            if not all(int(c)==0 for sc in simpleControls):
                 frame = bincam.read_frame(show=False)
                 #path = '/Users/JonathanLee/Desktop/sandbox/vision/Net/images_train/img_' + str(i) + '.jpg'
                 path = constants.IMAGES_TRAIN_DIR + "img_" + str(i) + ".jpg"
@@ -114,6 +107,13 @@ def directControl(test=False, deploy=False, learn=False): # use this to
             #print getSimpleState()
             time.sleep(.05)
 
+def expand_controls(controls):
+    for i in range(len(controls)):
+        controls[i] = controls[i] * scales[i]
+        if controls[i] < drift:
+            controls[i] = 0.0
+    return [controls[0], 0.0, controls[1], 0.0, controls[2], controls[3]]
+    
 
 def save_example(writer, path, frame, controls):
     cv2.imwrite(path, frame)

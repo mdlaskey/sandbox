@@ -1,0 +1,153 @@
+# Specifies the model for training/testing
+
+name: "net"
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "labels"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+     source: "/Users/JonathanLee/Desktop/sandbox/vision/Net/hdf/train_hdf.txt"
+     batch_size: 450
+  }
+}
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "labels"
+  include {
+    phase: TEST
+  }
+  hdf5_data_param {
+     source: "/Users/JonathanLee/Desktop/sandbox/vision/Net/hdf/test_hdf.txt"
+     batch_size: 120
+  }
+}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    weight_filler {
+      type: "xavier"
+    }
+    num_output: 16     # learn 16 filters
+    kernel_size: 11    # each filter is 11x11
+    stride: 1          # step 2 pixels between each filter application
+    bias_filler {
+      type: "constant" # initialize the biases to zero (0)
+      value: 0
+    }
+  }
+}
+layer {
+    name: "reluConv"
+    type: "ReLU"
+    bottom: "conv1"
+    top: "conv1"
+}
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "conv1"
+  top: "conv2"
+  # learning rate and decay multipliers for the filters
+  param { lr_mult: 1 decay_mult: 1 }
+  # learning rate and decay multipliers for the biases
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param {
+    weight_filler {
+      type: "xavier"
+    }
+    num_output: 16     # learn 16 filters
+    kernel_size: 11    # each filter is 11x11
+    stride: 2          # step 2 pixels between each filter application
+    bias_filler {
+      type: "constant" # initialize the biases to zero (0)
+      value: 0
+    }
+  }
+}
+layer {
+  name: "fc1"
+  type: "InnerProduct"
+  bottom: "conv2"
+  top: "fc1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    weight_filler {
+      type: "xavier"
+    }
+    num_output: 40
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu1"
+  type: "ReLU"
+  bottom: "fc1"
+  top: "fc1"
+}
+
+
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "fc1"
+  top: "fc2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    weight_filler {
+      type: "xavier"
+    }
+    num_output: 4
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+  name: "out"
+  bottom: "fc2"
+  top: "out"
+  type: "TanH"
+}
+
+# Loss and accuracy layers used for training/testing
+layer {
+    name: "loss"
+    type: "EuclideanLoss"
+    bottom: "out"
+    bottom: "labels"
+    top: "loss"
+}
+
+
