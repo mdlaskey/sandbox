@@ -6,3 +6,6 @@ Net/hdf/train.h5
 !Net/logs/saved/*/*.solverstate
 !Net/nets/*/logs/*.caffemodel
 !Net/nets/*/logs/*.solverstate
+!Net/nets/*/logs/*/*.caffemodel
+!Net/nets/*/logs/*/*.solverstate
+
