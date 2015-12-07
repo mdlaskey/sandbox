@@ -173,7 +173,7 @@ def scale_controls_smart(scales, translate=0.0):
         trainx.write(new_line)
     
     for line in test_lines:
-        split = lines.split(' ')
+        split = line.split(' ')
         path = split[0]
 
         controls = [float(x)/scale for x, scale in zip(split[1:], scales) ]
@@ -183,8 +183,40 @@ def scale_controls_smart(scales, translate=0.0):
         new_line = path + controls_string + "\n"
         testx.write(new_line)
 
+def translate_controls():
+    trainx_path = net_path + "hdf/trainx.txt"
+    testx_path = net_path + "hdf/testx.txt"
     
+    train_path = net_path + "hdf/train.txt"
+    test_path = net_path + "hdf/test.txt"
 
+    train_lines = [ x for x in open(train_path, 'r') ]
+    test_lines = [x for x in open(test_path, 'r') ]
+    
+    trainx = open(trainx_path, 'w')
+    testx = open(testx_path, 'w')
+
+    for line in train_lines:
+        split = line.split(' ')
+        path = split[0]
+        
+        controls = [float(x)/2.0 + .5 for x in split[1:] ]
+        controls_string = ""
+        for c in controls:
+            controls_string += " " + str(c)
+        new_line = path + controls_string + "\n"
+        trainx.write(new_line)
+
+    for line in test_lines:
+        split = line.split(' ')
+        path = split[0]
+
+        controls = [float(x)/2.0 + .5 for x in split[1:] ]
+        controls_string = ""
+        for c in controls:
+            controls_string += " " + str(c)
+        new_line = path + controls_string + "\n"
+        testx.write(new_line)
 
 def scale_all_images():
     images_train_path = "./Net/images_train/"

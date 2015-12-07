@@ -11,7 +11,7 @@ layer {
   }
   hdf5_data_param {
      source: "/Users/JonathanLee/Desktop/sandbox/vision/Net/hdf/train_hdf.txt"
-     batch_size: 450
+     batch_size: 500
   }
 }
 layer {
@@ -143,18 +143,12 @@ layer {
 }
 
 layer {
-  name: "relu2"
+  name: "out"
   type: "ReLU"
   bottom: "fc2"
-  top: "fc2"
+  top: "out"
 }
 
-layer {
-  name: "out"
-  bottom: "fc2"
-  top: "out"
-  type: "TanH"
-}
 
 # Loss and accuracy layers used for training/testing
 layer {
