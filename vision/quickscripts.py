@@ -144,6 +144,48 @@ def scale_all_controls():
         test.write(new_line)
 
 
+def scale_controls_smart(scales, translate=0.0):
+    """
+    read from original train/test path file
+    write to trainx and testx file paths
+    """
+    train_orig_path = net_path + "hdf/old/train_orig.txt"
+    test_orig_path = net_path + "hdf/old/test_orig.txt"
+    
+    trainx_path = net_path + "hdf/trainx.txt"
+    testx_path = net_path + "hdf/testx.txt"
+
+    train_lines = [ x for x in open(train_orig_path, 'r') ]
+    test_lines = [ x for x in open(test_orig_path, 'r') ]
+
+    trainx = open(trainx_path, 'w')
+    testx = open(testx_path, 'w')
+
+    for line in train_lines:
+        split = line.split(' ')
+        path = split[0]
+        
+        controls = [float(x)/scale for x, scale in zip(split[1:], scales) ]
+        controls_string = ""
+        for c in controls:
+            controls_string += " " + str(c)
+        new_line = path + controls_string + "\n"
+        trainx.write(new_line)
+    
+    for line in test_lines:
+        split = lines.split(' ')
+        path = split[0]
+
+        controls = [float(x)/scale for x, scale in zip(split[1:], scales) ]
+        controls_string = ""
+        for c in controls:
+            controls_string += " " + str(c)
+        new_line = path + controls_string + "\n"
+        testx.write(new_line)
+
+    
+
+
 def scale_all_images():
     images_train_path = "./Net/images_train/"
     images_test_path = "./Net/images_test/"

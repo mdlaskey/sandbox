@@ -14,7 +14,7 @@ import constants
 import cv2
 import argparse
 import caffe
-
+import runner
 
 
 t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
