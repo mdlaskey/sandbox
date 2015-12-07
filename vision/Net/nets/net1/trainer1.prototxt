@@ -105,14 +105,14 @@ layer {
   name: "relu1"
   type: "ReLU"
   bottom: "fc1"
-  top: "fc1"
+  top: "relu1"
 }
 
 
 layer {
   name: "fc2"
   type: "InnerProduct"
-  bottom: "fc1"
+  bottom: "relu1"
   top: "fc2"
   param {
     lr_mult: 1

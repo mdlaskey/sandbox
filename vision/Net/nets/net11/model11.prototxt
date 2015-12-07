@@ -36,15 +36,9 @@ layer {
   }
 }
 layer {
-    name: "reluConv1"
-    type: "ReLU"
-    bottom: "conv1"
-    top: "reluConv1"
-}
-layer {
   name: "conv2"
   type: "Convolution"
-  bottom: "reluConv1"
+  bottom: "conv1"
   top: "conv2"
   # learning rate and decay multipliers for the filters
   param { lr_mult: 1 decay_mult: 1 }
@@ -63,19 +57,10 @@ layer {
     }
   }
 }
-
-layer {
-    name: "reluConv2"
-    type: "ReLU"
-    bottom: "conv2"
-    top: "reluConv2"
-}
-
-
 layer {
   name: "fc1"
   type: "InnerProduct"
-  bottom: "reluConv2"
+  bottom: "conv2"
   top: "fc1"
   param {
     lr_mult: 1
@@ -96,17 +81,11 @@ layer {
     }
   }
 }
-layer {
-  name: "relu1"
-  type: "ReLU"
-  bottom: "fc1"
-  top: "relu1"
-}
 
 layer {
   name: "fc2"
   type: "InnerProduct"
-  bottom: "relu1"
+  bottom: "fc1"
   top: "fc2"
   param {
     lr_mult: 1

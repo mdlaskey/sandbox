@@ -1,18 +1,32 @@
-# Specifies the model used for classification
+# Specifies the model for training/testing
 
-name: "model"
-input: "data"
-
-# input_dim: batch size x feature dimension x height x width
-
-# Batch size for classifications
-input_dim: 1
-# Feature dimension. Example: RGB uses 3.
-input_dim: 3
-# Height/width of input vector/image
-input_dim: 125 
-input_dim: 125
-
+name: "net"
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "labels"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+     source: "/Users/JonathanLee/Desktop/sandbox/vision/Net/hdf/train_hdf.txt"
+     batch_size: 20
+  }
+}
+layer {
+  name: "data"
+  type: "HDF5Data"
+  top: "data"
+  top: "labels"
+  include {
+    phase: TEST
+  }
+  hdf5_data_param {
+     source: "/Users/JonathanLee/Desktop/sandbox/vision/Net/hdf/test_hdf.txt"
+     batch_size: 10
+  }
+}
 layer {
   name: "conv1"
   type: "Convolution"
@@ -36,15 +50,9 @@ layer {
   }
 }
 layer {
-    name: "reluConv1"
-    type: "ReLU"
-    bottom: "conv1"
-    top: "reluConv1"
-}
-layer {
   name: "conv2"
   type: "Convolution"
-  bottom: "reluConv1"
+  bottom: "conv1"
   top: "conv2"
   # learning rate and decay multipliers for the filters
   param { lr_mult: 1 decay_mult: 1 }
@@ -63,19 +71,10 @@ layer {
     }
   }
 }
-
-layer {
-    name: "reluConv2"
-    type: "ReLU"
-    bottom: "conv2"
-    top: "reluConv2"
-}
-
-
 layer {
   name: "fc1"
   type: "InnerProduct"
-  bottom: "reluConv2"
+  bottom: "conv2"
   top: "fc1"
   param {
     lr_mult: 1
@@ -96,17 +95,12 @@ layer {
     }
   }
 }
-layer {
-  name: "relu1"
-  type: "ReLU"
-  bottom: "fc1"
-  top: "relu1"
-}
+
 
 layer {
   name: "fc2"
   type: "InnerProduct"
-  bottom: "relu1"
+  bottom: "fc1"
   top: "fc2"
   param {
     lr_mult: 1
@@ -134,3 +128,14 @@ layer {
   top: "out"
   type: "TanH"
 }
+
+# Loss and accuracy layers used for training/testing
+layer {
+    name: "loss"
+    type: "EuclideanLoss"
+    bottom: "out"
+    bottom: "labels"
+    top: "loss"
+}
+
+
