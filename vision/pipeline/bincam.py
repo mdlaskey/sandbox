@@ -111,7 +111,7 @@ class BinaryCamera():
                     # map dark ring to a shade of green
                     mapRange(frame, (j, i))   
 
-        frame = cv2.resize(frame, (250, 250))                 
+        frame = cv2.resize(frame, (125, 125))                 
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         frame_binary = cv2.inRange(frame_hsv, BinaryCamera.lower_green, BinaryCamera.upper_green)
         frame_binary = 255 - frame_binary

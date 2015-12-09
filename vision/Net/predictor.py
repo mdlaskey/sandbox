@@ -3,8 +3,8 @@ import hdf
 import numpy as np
 import os
 
-MODEL = './nets/net3/model3.prototxt'
-WEIGHTS = './weights_iter_110.caffemodel'
+MODEL = './nets/net9/model9.prototxt'
+WEIGHTS = './weights_iter_40.caffemodel'
 
 net = caffe.Net(MODEL, WEIGHTS, caffe.TEST)
 
@@ -23,5 +23,9 @@ for line in f:
     data = net.blobs['fc2'].data.copy()
     s = ""
     for x in data[0]:
+        #x = (x - .0) * 150.0
+        #if abs(x) < 20.0:
+        #    s += " 0.0"
+        #else:
         s += " " + str(x)
     print path + s
