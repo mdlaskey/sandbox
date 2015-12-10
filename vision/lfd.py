@@ -11,7 +11,7 @@ def test(options, c, izzy, t):
     """
     bincam = BinaryCamera()
     bincam.open()
-    
+
     while True:
         frame = bincam.read_binary_frame(show=options.show)
         controls = c.getUpdates()
@@ -26,6 +26,8 @@ def test(options, c, izzy, t):
         t.control([controls[5]])
         time.sleep(.05)
 
+
+
 def deploy(options, c, izzy, t):
     """
     params - options, controller, izzy, turntable    
@@ -34,25 +36,47 @@ def deploy(options, c, izzy, t):
     bincam.open()
     frame = bincam.read_binary_frame()
     net = caffe.Net(options.model, options.weights, caffe.TEST)
+    
+    dataset_path = create_new_dataset()
+    writer = open(dataset_path + "controls.txt", 'w+')
+    i = 0
+
     while True:
-        # bincam frames go from 0 to 255 in 1 dim
-        # assuming 125x125 images
-        data4D = np.zeros([1, 3, 125, 125])
-        frame = frame / 255.0
-        data4D[0,0,:,:] = frame
-	data4D[0,1,:,:] = frame
-	data4D[0,2,:,:] = frame
-          
-        net.forward_all(data=data4D)
-        controls = net.blobs['out'].data.copy()[0]
+        if c.shouldOverride():
+            controls = c.getUpdates()
+            controls[1] = 0
+            controls[3] = 0
+            print controls
+            izzy.control(controls)
+            t.control([controls[5]])
             
-        # scale controls and squash small controls
-        controls = revert_controls(controls)
-        print controls
-        izzy.control(controls)
-        t.control([controls[5]])
+            simpleControls = [controls[0], controls[2], controls[4], controls[5]]
+            if not all(int(sc)==0 for sc in simpleControls):
+                frame = bincam.read_frame(show=options.show)                
+                filename = "img_" + str(i) + ".jpg"
+                save_example(writer, dataset_path, filename, frame, simpleControls)
+                i+=1
+            
+        else:
+            # bincam frames go from 0 to 255 in 1 dim
+            # assuming 125x125 images
+            data4D = np.zeros([1, 3, 125, 125])
+            frame = frame / 255.0
+            data4D[0,0,:,:] = frame
+	    data4D[0,1,:,:] = frame
+	    data4D[0,2,:,:] = frame
+          
+            net.forward_all(data=data4D)
+            controls = net.blobs['out'].data.copy()[0]
+            
+            # scale controls and squash small controls
+            controls = revert_controls(controls)
+            print controls
+            izzy.control(controls)
+            t.control([controls[5]])
+            frame = bincam.read_binary_frame()
+            
         time.sleep(.05)
-        frame = bincam.read_binary_frame()
     
 
 
@@ -70,10 +94,7 @@ def learn(options, c, izzy, t):
     while True:
         controls = c.getUpdates()     
         print controls
-        if controls is None:
-            print "Done"
-            izzy.stop()
-            break 
+        
         controls[1] = 0
         controls[3] = 0
         izzy.control(controls)
@@ -82,12 +103,10 @@ def learn(options, c, izzy, t):
         # store this however you please. (concatenate into array?)
         simpleControls = [controls[0], controls[2], controls[4], controls[5]]
         if not all(int(sc)==0 for sc in simpleControls):
-            frame = bincam.read_frame(show=False)
+            frame = bincam.read_frame(show=options.show)            
             filename = "img_" + str(i) + ".jpg"
             save_example(writer, dataset_path, filename, frame, simpleControls)
             i+=1
-             
-        #print getSimpleState()
         time.sleep(.05)
 
 

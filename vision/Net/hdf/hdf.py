@@ -17,7 +17,7 @@ def reshape(img):
     return b
 
 
-def img2hdf(filename_prefix, stop=-1):
+def img2hdf(filename_prefix, cutoff=-1):
     """
     Retrieve images from textfile of paths and labels
     Write images and labels to datasets
@@ -25,7 +25,7 @@ def img2hdf(filename_prefix, stop=-1):
     filename_prefix - prefix name of text file to read from (exclude extension)
     [ i.e. img2hdf('train') as opposed to img2hdf('train.txt') ]
     """
-    data = parser.parse(filename_prefix + '.txt', stop)
+    data = parser.parse(filename_prefix + '.txt', cutoff)
     paths, labels = zip(*data)
     
     images = np.array([ reshape(np.round(caffe.io.load_image(path), 0)) for path in paths ])

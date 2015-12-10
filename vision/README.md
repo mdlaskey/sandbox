@@ -5,6 +5,10 @@
 The files in this root directory are responsible for handling gripper controls
 from user input and from neural net predictions.
 
+Before starting you'll need to calibrate the camera and ensure the Xbox controller is 
+properly interpreted (see below).
+
+
 #### Xbox controller with OS X Yosemite (10.10.x)
 
 Install [Xbox controller driver](http://tattiebogle.net/index.php/ProjectRoot/Xbox360Controller/OsxDriver) version 0.11. Other drivers may interpret buttons on the Xbox controller differently.
@@ -19,8 +23,6 @@ recognizes the d-pad as buttons 0-3 rather than as a "hat." If your buttons are 
 
 Exit test_joystick.py and connect the arduinos. Check in the arduino IDE for the USB ports
 and change them if necessary in IzzyRun.py and TurnTable.py.
-
-Run IzzyRun.py with `$ python IzzyRun.py`
 
 Most of the control code was written by Dave Gealy.
 

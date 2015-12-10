@@ -3,8 +3,8 @@ import hdf
 import numpy as np
 import os
 
-MODEL = './nets/net9/model9.prototxt'
-WEIGHTS = './weights_iter_40.caffemodel'
+MODEL = './nets/net4/model4.prototxt'
+WEIGHTS = './nets/net4/weights_iter_180.caffemodel'
 
 net = caffe.Net(MODEL, WEIGHTS, caffe.TEST)
 
@@ -20,7 +20,7 @@ for line in f:
     data4D[0,2,:,:] = image[:,:,2]
 
     net.forward_all(data=data4D)
-    data = net.blobs['fc2'].data.copy()
+    data = net.blobs['out'].data.copy()
     s = ""
     for x in data[0]:
         #x = (x - .0) * 150.0

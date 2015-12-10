@@ -4,7 +4,7 @@ net: "/Users/JonathanLee/Desktop/sandbox/vision/Net/nets/net2/trainer2.prototxt"
 test_iter: 1
 test_interval: 1
 #base_lr: 0.00001
-base_lr: .01
+base_lr: .003
 lr_policy: "step"
 gamma: .1
 stepsize: 150
