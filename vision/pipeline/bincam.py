@@ -54,10 +54,6 @@ class BinaryCamera():
         self.vc = None
         self.recorder = None
 
-        #if self.vc.isOpened():
-        #    rval, frame = self.vc.read()
-        #else:
-        #    rval = False
         if not meta == '':
             f = open(meta, 'r')
             self.maxRedLoc = [ int(x) for x in f.readline().split(',') ]

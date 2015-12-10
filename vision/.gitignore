@@ -1,5 +1,6 @@
 Net/hdf/test.h5
 Net/hdf/train.h5
+legacy/
 *.solverstate
 *.caffemodel
 !Net/logs/saved/*/*.caffemodel
