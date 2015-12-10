@@ -1,3 +1,5 @@
+*.pyc
+*.swp
 Net/hdf/test.h5
 Net/hdf/train.h5
 legacy/
