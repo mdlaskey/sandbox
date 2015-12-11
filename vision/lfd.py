@@ -1,19 +1,22 @@
-from pipeline.bincam import BinaryCamera
+from Net.pipeline.bincam import BinaryCamera
 import numpy as np
 import caffe
-import constants
+from Net import constants
 import time
 import cv2
+import os
 
 def test(options, c, izzy, t):
     """
     params - options, controller, izzy, turntable
     """
-    bincam = BinaryCamera()
+    bincam = BinaryCamera('./net/pipeline/meta.txt')
     bincam.open()
 
     while True:
-        frame = bincam.read_binary_frame(show=options.show)
+        if c.shouldOverride():
+            print "should override"
+        frame = bincam.read_frame(show=options.show)
         controls = c.getUpdates()
         print "test: " + str(controls)
         if controls is None:
@@ -32,21 +35,20 @@ def deploy(options, c, izzy, t):
     """
     params - options, controller, izzy, turntable    
     """
-    bincam = bincam.BinaryCamera()
+    bincam = BinaryCamera('./net/pipeline/meta.txt')
     bincam.open()
-    frame = bincam.read_binary_frame()
-    net = caffe.Net(options.model, options.weights, caffe.TEST)
+    net = caffe.Net(options.model_path, options.weights_path, caffe.TEST)
     
-    dataset_path = create_new_dataset()
+    dataset_path = get_dataset("supervisor_net3_12-10-2015")
     writer = open(dataset_path + "controls.txt", 'w+')
-    i = 0
+    i = next_data_index(dataset_path)
 
     while True:
         if c.shouldOverride():
             controls = c.getUpdates()
             controls[1] = 0
             controls[3] = 0
-            print controls
+            print "supervisor: " + str(controls)
             izzy.control(controls)
             t.control([controls[5]])
             
@@ -60,6 +62,7 @@ def deploy(options, c, izzy, t):
         else:
             # bincam frames go from 0 to 255 in 1 dim
             # assuming 125x125 images
+            frame = bincam.read_binary_frame()
             data4D = np.zeros([1, 3, 125, 125])
             frame = frame / 255.0
             data4D[0,0,:,:] = frame
@@ -70,12 +73,12 @@ def deploy(options, c, izzy, t):
             controls = net.blobs['out'].data.copy()[0]
             
             # scale controls and squash small controls
-            controls = revert_controls(controls)
+            controls = revert_controls(controls, options)
             print controls
             izzy.control(controls)
             t.control([controls[5]])
-            frame = bincam.read_binary_frame()
-            
+
+        c.getUpdates()
         time.sleep(.05)
     
 
@@ -84,7 +87,7 @@ def learn(options, c, izzy, t):
     """
     params - options, controller, izzy, turntable    
     """
-    bincam = bincam.BinaryCamera()
+    bincam = bincam.BinaryCamera('./net/pipeline/meta.txt')
     bincam.open()
 
     dataset_path = create_new_dataset()
@@ -109,10 +112,26 @@ def learn(options, c, izzy, t):
             i+=1
         time.sleep(.05)
 
+def get_dataset(name=''):
+    datasets = constants.ROOT + "data/"
+    if len(name) == 0:
+        return create_new_dataset()
+    else:
+        dataset_path = datasets + name + "/"
+        if not os.path.exists(dataset_path):
+            os.makedirs(dataset_path)
+        return dataset_path
+
+def next_data_index(dataset_path, i=0):
+    path = dataset_path + "img_" + str(i) + ".jpg"
+    while os.path.isfile(path):
+        i += 1
+        path = dataset_path + "img_" + str(i) + ".jpg"
+    return i
 
 def create_new_dataset():
     i = 0
-    datasets = constants.ROOT + "datasets/"
+    datasets = constants.ROOT + "data/"
     while os.path.exists(datasets + "dataset" + str(i) + "/"):
         i += 1
     dataset_path = datasets + "dataset" + str(i) + "/"
@@ -128,14 +147,14 @@ def save_example(writer, dataset_path, filename, frame, controls):
 
 
 
-def revert_controls(controls):
+def revert_controls(controls, options):
     for i in range(len(controls)):
-        controls[i] = (controls[i] - translations[i]) * scales[i] * 1.2
-        if abs(controls[i]) < drift:
+        controls[i] = (controls[i] - options.translations[i]) * options.scales[i] * 1.2
+        if abs(controls[i]) < options.drift:
             controls[i] = 0.0
     return [controls[0], 0.0, controls[1], 0.0, controls[2], controls[3]]
 
-def transform_controls(controls):
+def transform_controls(controls, scales, translations):
     controls = [controls[0], controls[2], controls[4], controls[5]]
     for i in range(len(controls)):
         controls[i] = controls[i] / scales[i] + translations[i]

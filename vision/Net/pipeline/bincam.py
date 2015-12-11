@@ -54,12 +54,11 @@ class BinaryCamera():
         self.vc = None
         self.recorder = None
 
-        if not meta == '':
-            f = open(meta, 'r')
-            self.maxRedLoc = [ int(x) for x in f.readline().split(',') ]
-            self.d = int(float(f.readline()))
-            self.d_squared = self.d * self.d
-            f.close()
+        f = open(meta, 'r')
+        self.maxRedLoc = [ int(x) for x in f.readline().split(',') ]
+        self.d = int(float(f.readline()))
+        self.d_squared = self.d * self.d
+        f.close()
         
     def open(self):
         self.vc = cv2.VideoCapture(0)

@@ -38,10 +38,10 @@ def directControl(options): # use this to
     #c = XboxController([100,155,155,155,100]) # this was original scaling
 
     if options.test:
-        ldf.test(options, c, izzy, t)
+        lfd.test(options, c, izzy, t)
             
     elif options.deploy:
-        ldf.deploy(options, c, izzy, t)
+        lfd.deploy(options, c, izzy, t)
             
     elif options.learn:
         lfd.learn(options, c, izzy, t)
@@ -70,7 +70,7 @@ options.learn = args['learn']
 options.show = args['show']
 
 options.model_path = constants.ROOT + 'nets/net3/model3.prototxt'
-options.weight_path = constants.ROOT + 'weights_iter_110.caffemodel'
+options.weights_path = constants.ROOT + 'nets/net3/weights_iter_70.caffemodel'
 
 directControl(options)
 izzy.stop()

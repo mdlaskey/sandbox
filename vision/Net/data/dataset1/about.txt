@@ -1,0 +1,5 @@
+Created 12/9/2015
+
+Second original dataset collected via supervisor demonstration.
+Same task as previous.
+Controls and images were not altered by postprocessing.

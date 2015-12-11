@@ -7,7 +7,6 @@ import random
 
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-d', '--dataset', required=True)
 ap.add_argument('-s', '--segment', required=False, action='store_true')
 args = vars(ap.parse_args())
 
@@ -15,11 +14,20 @@ args = vars(ap.parse_args())
 bc = bincam.BinaryCamera('./pipeline/meta.txt')
 
 ds = args['dataset']
+
+
 ds_path = "./Net/data/" + ds + "/"
 
+
+
+"""
 reader = open(ds_path + "controls.txt", 'r')
+
+# erase data in files
 train_writer = open("Net/hdf/train.txt", 'w')
+train_writer.close()
 test_writer = open("Net/hdf/test.txt", 'w')
+test_writer.close()
 
 for line in reader:
     split = line.split(' ')
@@ -40,4 +48,4 @@ for line in reader:
     else:
         test_writer.write(line)
 
-
+"""

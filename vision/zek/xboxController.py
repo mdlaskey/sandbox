@@ -119,7 +119,8 @@ class XboxController:
         return False
 
     def shouldOverride(self):
-        return controller.get_button(9) == 1.0
+        print self.controller.get_button(9)
+        return self.controller.get_button(9) == 1.0
 
 
 # returns dirs in up down left right order
