@@ -41,7 +41,8 @@ def directControl(options): # use this to
         lfd.test(options, c, izzy, t)
             
     elif options.deploy:
-        lfd.deploy(options, c, izzy, t)
+        bc = lfd.deploy(options, c, izzy, t)
+        bc.save_recording()
             
     elif options.learn:
         lfd.learn(options, c, izzy, t)
@@ -70,7 +71,7 @@ options.learn = args['learn']
 options.show = args['show']
 
 options.model_path = constants.ROOT + 'nets/net3/model3.prototxt'
-options.weights_path = constants.ROOT + 'nets/net3/weights_iter_70.caffemodel'
+options.weights_path = constants.ROOT + 'nets/net3/weights_iter_115.caffemodel'
 
 directControl(options)
 izzy.stop()

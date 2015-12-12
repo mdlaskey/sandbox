@@ -39,7 +39,7 @@ def deploy(options, c, izzy, t):
     bincam.open()
     net = caffe.Net(options.model_path, options.weights_path, caffe.TEST)
     
-    dataset_path = get_dataset("supervisor_net3_12-10-2015")
+    dataset_path = get_dataset("supervisor_net3_12-11-2015")
     writer = open(dataset_path + "controls.txt", 'w+')
     i = next_data_index(dataset_path)
 
@@ -54,7 +54,7 @@ def deploy(options, c, izzy, t):
             
             simpleControls = [controls[0], controls[2], controls[4], controls[5]]
             if not all(int(sc)==0 for sc in simpleControls):
-                frame = bincam.read_frame(show=options.show)                
+                frame = bincam.read_frame(show=options.show, record=True)                
                 filename = "img_" + str(i) + ".jpg"
                 save_example(writer, dataset_path, filename, frame, simpleControls)
                 i+=1
@@ -62,7 +62,7 @@ def deploy(options, c, izzy, t):
         else:
             # bincam frames go from 0 to 255 in 1 dim
             # assuming 125x125 images
-            frame = bincam.read_binary_frame()
+            frame = bincam.read_binary_frame(record=True)
             data4D = np.zeros([1, 3, 125, 125])
             frame = frame / 255.0
             data4D[0,0,:,:] = frame
@@ -80,6 +80,11 @@ def deploy(options, c, izzy, t):
 
         c.getUpdates()
         time.sleep(.05)
+        key = cv2.waitKey(20)
+        if c.shouldEnd():
+            print "breaking"
+            break
+    return bincam
     
 
 
@@ -149,7 +154,7 @@ def save_example(writer, dataset_path, filename, frame, controls):
 
 def revert_controls(controls, options):
     for i in range(len(controls)):
-        controls[i] = (controls[i] - options.translations[i]) * options.scales[i] * 1.2
+        controls[i] = (controls[i] - options.translations[i]) * options.scales[i] * 1.5
         if abs(controls[i]) < options.drift:
             controls[i] = 0.0
     return [controls[0], 0.0, controls[1], 0.0, controls[2], controls[3]]

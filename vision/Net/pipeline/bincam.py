@@ -59,6 +59,7 @@ class BinaryCamera():
         self.d = int(float(f.readline()))
         self.d_squared = self.d * self.d
         f.close()
+        self.recording = []
         
     def open(self):
         self.vc = cv2.VideoCapture(0)
@@ -70,17 +71,20 @@ class BinaryCamera():
     def is_open(self):
         return self.vc is not None and self.vc.isOpened()
 
-    def read_frame(self, show=False):
+    def read_frame(self, show=False, record=False):
         """
         Returns cropped frame of raw video
         """
         rval, frame = self.vc.read()
         frame = frame[0+constants.OFFSET_Y:constants.HEIGHT+constants.OFFSET_Y, 0+constants.OFFSET_X:constants.WIDTH+constants.OFFSET_X]
+        
+        if record:
+            self.recording.append(frame)
         if show:
             cv2.imshow("preview", frame)
         return frame
         
-    def read_binary_frame(self, show=False):
+    def read_binary_frame(self, show=False, record=False):
         """
         Returns a cropped binary frame of the video
         Significantly slower than read_frame due to the pipeline.
@@ -89,6 +93,8 @@ class BinaryCamera():
         frame = frame[0+constants.OFFSET_Y:constants.HEIGHT+constants.OFFSET_Y, 0+constants.OFFSET_X:constants.WIDTH+constants.OFFSET_X]        
         frame_binary = self.pipe(frame)
         
+        if record:
+            self.recording.append(frame)
         if show:
             cv2.imshow("binary", frame_binary)
             
@@ -117,5 +123,9 @@ class BinaryCamera():
     def destroy(self):
         cv2.destroyAllWindows()
 
-
+    def save_recording(self):
+        i = 0
+        for frame in self.recording:
+            cv2.imwrite('./deploy/frame_' + str(i) + ".jpg", frame)
+            i+=1
 
