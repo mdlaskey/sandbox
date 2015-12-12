@@ -1,33 +1,27 @@
 import argparse
 import gopt
-from pipeline import bincam
-import constants
+from Net.pipeline import bincam
+import Net.constants
 import cv2
 import random
 
 
 ap = argparse.ArgumentParser()
+ap.add_argument('-d', '--datasets', required=True)
 ap.add_argument('-s', '--segment', required=False, action='store_true')
 args = vars(ap.parse_args())
+#bc = bincam.BinaryCamera('./Net/pipeline/meta.txt')
 
-
-bc = bincam.BinaryCamera('./pipeline/meta.txt')
-
-ds = args['dataset']
-
-
-ds_path = "./Net/data/" + ds + "/"
+datasets = args['datasets'].split(' ')
+ds_paths = [ "./Net/data/" + ds + "/" for ds in datasets ]
 
 
 
-"""
 reader = open(ds_path + "controls.txt", 'r')
 
 # erase data in files
-train_writer = open("Net/hdf/train.txt", 'w')
-train_writer.close()
-test_writer = open("Net/hdf/test.txt", 'w')
-test_writer.close()
+open("Net/hdf/train.txt", 'w').close()
+open("Net/hdf/test.txt", 'w').close()
 
 for line in reader:
     split = line.split(' ')
@@ -48,4 +42,4 @@ for line in reader:
     else:
         test_writer.write(line)
 
-"""
+
