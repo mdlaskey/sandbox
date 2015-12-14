@@ -54,7 +54,7 @@ def deploy(options, c, izzy, t):
                 
                 simpleControls = [controls[0], controls[2], controls[4], controls[5]]
                 if not all(int(sc)==0 for sc in simpleControls):
-                    frame = bincam.read_frame(show=options.show, record=True)                
+                    frame = bincam.read_frame(show=options.show, record=options.record)                
                     filename = "img_" + str(i) + ".jpg"
                     save_example(writer, dataset_path, filename, frame, simpleControls)
                     i+=1
@@ -62,7 +62,7 @@ def deploy(options, c, izzy, t):
             else:
                 # bincam frames go from 0 to 255 in 1 dim
                 # assuming 125x125 images
-                frame = bincam.read_binary_frame(record=True)
+                frame = bincam.read_binary_frame(record=options.record)
                 data4D = np.zeros([1, 3, 125, 125])
                 frame = frame / 255.0
                 data4D[0,0,:,:] = frame

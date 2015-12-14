@@ -19,6 +19,7 @@ class GripperOptions():
         self.model_path = ""        # path to network architecture prototxt
         self.weights_path = ""      # path to weights (should match model)
         self.show = False           # whether to show a preview window from bincam
+        self.record = False         # whether to record frames with bincam
         self.scales = GripperOptions.scales
         self.translations = GripperOptions.translations
         self.drift = GripperOptions.drift

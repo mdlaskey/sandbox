@@ -124,8 +124,19 @@ class BinaryCamera():
         cv2.destroyAllWindows()
 
     def save_recording(self):
+        """
+        save recording to a folder named "recordingj"
+        such that it does not overwrite another recording
+        """
+        j = 0
+        path = "./frames/recording" + str(j)
+        while os.path.exists(path):
+            j += 1
+            path = "./frames/recording" + str(j)
+        
+        os.makedirs(path) 
         i = 0
         for frame in self.recording:
-            cv2.imwrite('./deploy/frame_' + str(i) + ".jpg", frame)
+            cv2.imwrite(path + "/frame_" + str(i) + ".jpg", frame)
             i+=1
 
