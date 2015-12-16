@@ -136,7 +136,7 @@ def next_data_index(dataset_path, i=0):
 def create_new_dataset():
     i = 0
     datasets = constants.ROOT + "data/"
-    while os.path.exists(datasets + "dataset" + str(i) + "/"):
+    while os.path.exists(datasets + "dataset_" + str(i) + "/"):
         i += 1
     dataset_path = datasets + "dataset" + str(i) + "/"
     os.makedirs(dataset_path)
