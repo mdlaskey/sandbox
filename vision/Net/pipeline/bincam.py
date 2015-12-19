@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import constants
-
+import datetime
+import os
 
 def dist(loc1, loc2):
     d_squared = dist_squared(loc1, loc2)
@@ -125,15 +126,10 @@ class BinaryCamera():
 
     def save_recording(self):
         """
-        save recording to a folder named "recordingj"
+        save recording to a folder named "recording_{datetime}"
         such that it does not overwrite another recording
         """
-        j = 0
-        path = "./frames/recording" + str(j)
-        while os.path.exists(path):
-            j += 1
-            path = "./frames/recording" + str(j)
-        
+        path = "./frames/recording_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
         os.makedirs(path) 
         i = 0
         for frame in self.recording:

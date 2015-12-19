@@ -4,7 +4,7 @@ from Net.pipeline import bincam
 from Net import constants
 import cv2
 import random
-
+from Net import hdf
 
 ap = argparse.ArgumentParser()
 ap.add_argument('-d', '--datasets', required=True)
@@ -21,7 +21,7 @@ open("Net/hdf/test.txt", 'w').close()
 train_writer = open("Net/hdf/train.txt", "w+")
 test_writer = open("Net/hdf/test.txt", "w+")
 
-
+# construct train and test text files and segment if specified
 for dataset in datasets:
     ds_path = "./Net/data/" + dataset + "/"
     reader = open(ds_path + 'controls.txt', 'r')
@@ -33,6 +33,7 @@ for dataset in datasets:
         new_filename = dataset + "_" + filename
         controls = [ float(x)/float(s) for x, s in zip(split[1:], gopt.GripperOptions.scales) ]
 
+        # should segment and move images?
         if args['segment']:
             im = cv2.imread(ds_path + filename)
             im = bc.pipe(im)
@@ -48,3 +49,6 @@ for dataset in datasets:
             test_writer.write(line)
 
 
+# load the images into h5 files
+hdf.img2hdf('./Net/hdf/train')
+hdf.img2hdf('./Net/hdf/test')

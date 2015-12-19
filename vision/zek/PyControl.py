@@ -88,6 +88,8 @@ class PyControl:
         return
         
     def control(self,requests):
+        requests[1] = 0
+        requests[3] = 0
         self.ser.flushOutput()
         self.ser.flushInput()
         self.ser.write("s")

@@ -5,6 +5,7 @@ from Net import constants
 import time
 import cv2
 import os
+import datetime
 
 def test(options, c, izzy, t):
     """
@@ -39,11 +40,12 @@ def deploy(options, c, izzy, t):
     bincam.open()
     net = caffe.Net(options.model_path, options.weights_path, caffe.TEST)
     
-    dataset_path = get_dataset("supervisor_net3_12-11-2015")
+    dataset_path = get_dataset("supervisor_12-16-2015_14h42m41s")
     writer = open(dataset_path + "controls.txt", 'w+')
     i = next_data_index(dataset_path)
     try:
         while True:
+            #supervisor takes control
             if c.shouldOverride():
                 controls = c.getUpdates()
                 controls[1] = 0
@@ -58,7 +60,8 @@ def deploy(options, c, izzy, t):
                     filename = "img_" + str(i) + ".jpg"
                     save_example(writer, dataset_path, filename, frame, simpleControls)
                     i+=1
-                
+            
+            # net in control
             else:
                 # bincam frames go from 0 to 255 in 1 dim
                 # assuming 125x125 images
@@ -74,6 +77,8 @@ def deploy(options, c, izzy, t):
                 
                 # scale controls and squash small controls
                 controls = revert_controls(controls, options)
+                controls[1] = 0
+                controls[3] = 0
                 print controls
                 izzy.control(controls)
                 t.control([controls[5]])
@@ -94,7 +99,7 @@ def learn(options, c, izzy, t):
     bincam = bincam.BinaryCamera('./net/pipeline/meta.txt')
     bincam.open()
 
-    dataset_path = create_new_dataset()
+    dataset_path = create_new_dataset(prefix="supervisor")
     writer = open(dataset_path + "controls.txt", 'w+')
 
     i = 0
@@ -133,12 +138,9 @@ def next_data_index(dataset_path, i=0):
         path = dataset_path + "img_" + str(i) + ".jpg"
     return i
 
-def create_new_dataset():
-    i = 0
+def create_new_dataset(prefix="supervisor"):
     datasets = constants.ROOT + "data/"
-    while os.path.exists(datasets + "dataset_" + str(i) + "/"):
-        i += 1
-    dataset_path = datasets + "dataset" + str(i) + "/"
+    dataset_path = datasets + prefix + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + "/"
     os.makedirs(dataset_path)
     return dataset_path
 
@@ -158,10 +160,4 @@ def revert_controls(controls, options):
             controls[i] = 0.0
     return [controls[0], 0.0, controls[1], 0.0, controls[2], controls[3]]
 
-def transform_controls(controls, scales, translations):
-    controls = [controls[0], controls[2], controls[4], controls[5]]
-    for i in range(len(controls)):
-        controls[i] = controls[i] / scales[i] + translations[i]
-    return controls
- 
 

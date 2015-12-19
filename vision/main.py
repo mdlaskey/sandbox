@@ -27,9 +27,6 @@ t = TurnTableControl() # the com number may need to be changed. Default of com7 
 izzy = PyControl("/dev/cu.usbmodem14111",115200, .04, [0,0,0,0,0],[0,0,0]); #same with this
 ap = argparse.ArgumentParser()
 
-#scales = [150.0, 150.0, 150.0, 150.0]
-#translations = [0.0, 0.0, 0.0, 0.0]
-#drift = 20.0
 
 #DIRECT CONTROL
 
