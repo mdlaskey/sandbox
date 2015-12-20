@@ -1,0 +1,6 @@
+Created 12/16/2015
+
+Contains images and controls that corrected when the neural net
+failed to complete the task trained on dataset1 with one dagger iteration with net3 from 12/10/2015
+Controls and images have not been altered by postprocessing
+

@@ -7,9 +7,9 @@ The controller and gripper code was written by David Gealy.
 Integration with the hdf and the convnet was written by Jonathan
 """
 
-from zek.TurnTableControl import * 
-from zek.PyControl import * 
-from zek.xboxController import *
+from gripper.TurnTableControl import * 
+from gripper.PyControl import * 
+from gripper.xboxController import *
 import numpy as np
 
 
