@@ -9,11 +9,13 @@ class RotatingTable(Framework):
 	boxes = []
 	joints = []
 
-	def __init__(self, offset, center, radius, world = None):
+	def __init__(self, offset, center, radius, rotation_speed = 3.0, world = None):
 		super(RotatingTable, self).__init__()
 
 		# Set the gravity to be 0 in alll direction
 		self.world.gravity = (0,0)
+
+		self.rot_speed_ = rotation_speed
 
 		self.center_pos_ = (offset,center)
 
@@ -29,10 +31,28 @@ class RotatingTable(Framework):
 
 		if world != None:
 			self.parent_world_ = world
-			print world.contactCount
 		else:
 			self.parent_world_ = self.world
 
+
+	def rotate(self, body, magnitude):
+		fixture = b2FixtureDef(shape=body.fixtures[0].shape, density=5, friction=0.9)
+		theta = math.radians(magnitude*self.rot_speed_)
+		rotation_matrix = np.asmatrix([[math.cos(theta), -1*math.sin(theta)],
+						   			   [math.sin(theta), math.cos(theta)   ]])
+		if (self.checkInBounds(body)):
+			new_body_position = rotation_matrix * (np.asmatrix(body.position) - np.asmatrix(self.center_pos_)).T + np.asmatrix(self.center_pos_).T
+			new_body_position = np.ravel(new_body_position.T)
+		else:
+			new_body_position = body.position
+
+		return self.parent_world_.CreateDynamicBody(position=new_body_position,
+											fixtures=fixture,
+											angle=body.angle,
+											angularVelocity=body.angularVelocity,
+											linearVelocity=body.linearVelocity,
+											linearDamping=self.lin_damp_,
+											angularDamping=self.ang_damp_)
 
 	def rotate_cw(self, body):
 		fixture = b2FixtureDef(shape=body.fixtures[0].shape, density=5, friction=0.9)
@@ -75,6 +95,17 @@ class RotatingTable(Framework):
 											linearVelocity=body.linearVelocity,
 											linearDamping=self.lin_damp_,
 											angularDamping=self.ang_damp_)
+
+	def applyControl(self, magnitude):
+		self.rotate_all(magnitude)
+
+	def rotate_all(self, magnitude):
+		# Apply rotation matrix about the center point to all of the objects and destroy all the previous object
+		new_bodies = []
+		for body in self.bodies:
+			new_bodies.append(self.rotate(body, magnitude))
+			self.parent_world_.DestroyBody(body)
+		self.bodies = new_bodies
 
 	def rotate_cw_all(self):
 		"""
@@ -158,7 +189,7 @@ class RotatingTable(Framework):
 
 		@return list of b2Body
 		"""
-		return self.bodies[:len(boxes) - 1]
+		return self.bodies[:len(self.bodies) - 1]
 
 	def getTarget(self):
 		"""
@@ -177,7 +208,7 @@ class RotatingTable(Framework):
 		features = []
 		for box in self.bodies[:-1]:
 			# Extract the feature of each box and combine them as an array
-			features.append(np.ndarray([box.position, box.angle, box.linearVelocity, box.angularVelocity]))
+			features.append(np.array([box.position, box.angle, box.linearVelocity, box.angularVelocity]))
 		return np.vstack(features)
 
 	def getTargetState(self):
@@ -187,9 +218,9 @@ class RotatingTable(Framework):
 		the feature in order : (position, angle, linear velocity, angular velocity)
 		"""
 		features = []
-		target = box[-1]
+		target = self.bodies[-1]
 		# Extract the feature of each box and combine them as an array
-		features.append(np.ndarray([target.position, target.angle, target.linearVelocity, target.angularVelocity]))
+		features.append(np.array([target.position, target.angle, target.linearVelocity, target.angularVelocity]))
 		return np.vstack(features)
 
 	def Keyboard(self, key):
@@ -210,15 +241,15 @@ class RotatingTable(Framework):
 		# Build the target object in the table
 		circle_target = b2FixtureDef(shape=b2CircleShape(radius=1.1))
 
-		# inside_table = [(x,y) for x in range(0,30) for y in range(15,30)]
-		# inside_table = [(x, y) for x in range(int(self.center_pos_[0] - self.radius_ / 2.5), int(self.center_pos_[0] + self.radius_ / 2.5)) for y in range(int(self.center_pos_[1] - self.radius_), int(self.center_pos_[1] + self.radius_))]
 		inside_table = [(np.random.normal(loc=self.center_pos_[0],scale=self.radius_/3.0), np.random.normal(loc=self.center_pos_[1],scale=self.radius_/3.0)) for _ in range(self.num_obs_object_+1)]
+
 		# Create the obstruction object to the world
 		self.bodies = [self.parent_world_.CreateDynamicBody(position=pos,
 															fixtures=box,
 															linearDamping=self.lin_damp_,
 															angularDamping=self.ang_damp_)
 															for pos in inside_table[:self.num_obs_object_]]
+		# self.bodies = []
 
 		# Create the target object to the world
 		self.bodies.append(self.parent_world_.CreateDynamicBody(position=inside_table[self.num_obs_object_],

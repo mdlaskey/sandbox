@@ -35,8 +35,8 @@ y = close gripper
 i = open gripper
 
 Rotating Table:
-w = rotate counter clockwise
-s = rotate clockwise
+w = rotate counterclockwise
+s = rotate counterclockwise
 """
 from framework import *
 from Classes.randController import *
@@ -152,7 +152,7 @@ class GraspingWorld(Framework):
         shutil.rmtree('./training_image')
     os.mkdir('./training_image')
 
-    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None):
+    def __init__(self, rollout, learner=None, label=False, watch=False, inpt=None, initState=None, internal_params=None):
         super(GraspingWorld, self).__init__(gravity = (0,0))
 
         # The size of which the video will be recorded
@@ -178,19 +178,44 @@ class GraspingWorld(Framework):
         transform.angle = 0.0
         transform.position = (0, 0)
 
-        # self.initJointAngles = [0.0,0.0,0.0]
-        self.arm = OneArmedRobot(transform, scale=4.0/3.0)
-        self.arm.addToWorld(self.world)
-        self.gripper = self.arm.getGripper()
+        # 0 Angular Damping (angular_damp)
+        # 1 Linear Damping (linear_damp)
+        # 2 MassDensity (mass)
+        # 3 Friction (fric)
+        # 4 Rotating Table Motor Speed (rtms)
+        # 5 Rotating Arm Motor Speed (rams)
+        # 6 Translating Arm Motor Speed (tams)
+        # 7 Translating Gripper Finger Motor Speed (tgms)
+        # 8 Rotating Arm maxMotorTorque (ra_torque)
+        # 9 Translating Arm maxMotorForce (ta_force)
+        # 10 Translating Gripper Finger maxMotorForce (tg_force)
+
+        # Initialize the Robot Arm
+        if internal_params is None:
+            self.arm = OneArmedRobot(transform, scale=4.0/3.0)
+            self.arm.addToWorld(self.world)
+            self.gripper = self.arm.getGripper()
+        else:
+            self.arm = OneArmedRobot(transform, scale=4.0/3.0, rev_motor_speed=internal_params[5], 
+                                                            trans_motor_speed=internal_params[6],
+                                                            gripper_motor_speed=internal_params[7],
+                                                            rev_max_torque = internal_params[8],
+                                                            trans_max_force = internal_params[9], 
+                                                            gripper_max_force = internal_params[10] )
+            self.arm.addToWorld(self.world)
+            self.gripper = self.arm.getGripper()
 
         transform = b2Transform()
         transform.angle = 0.0
         transform.position = (0, 0)
         self.startPos = self.gripper.getCenterPosition()
-        #print(str(self.startPos))
         self.end = EndEffector(transform, self.startPos, 0.0)
         
-        self.table = RotatingTable(offset= -10, center=10.0, radius=12.0, world=self.world)
+        # Initialize the Rotating Table
+        if internal_params is None:
+            self.table = RotatingTable(offset= -10, center=10.0, radius=12.0, world=self.world)
+        else:
+            self.table = RotatingTable(offset= -10, center=10.0, radius=12.0, world=self.world, rotation_speed = internal_params[4])
         self.table.addToWorld()
         self.i = 0
         # self.numBoxes = 5
@@ -219,6 +244,9 @@ class GraspingWorld(Framework):
         #         inputs = self.getUserInput()
         #         self.inputs = np.array([inputs[0][0], inputs[0][1],
         #                                 inputs[1], inputs[2]])
+    
+    # def getState(self):
+    #     self.table.
 
     def reset(self):
         '''self.wait = True
@@ -306,6 +334,15 @@ class GraspingWorld(Framework):
 
         return userInput
 
+    def applyControl(self, table_control, rotational_control, translation_control, gripper_control):
+        # Controls :
+        # Rotating Table
+        # Rotating Arm
+        # Translation of Arm
+        # Translation of Gripper
+        self.table.applyControl(table_control)
+        self.arm.applyControl(rotational_control, translation_control, gripper_control)
+
     def applyInput(self, inpt):
         pos = self.end.move(inpt[0])
         self.drawCursor(pos)
@@ -319,23 +356,29 @@ class GraspingWorld(Framework):
             self.arm.setTargetAngles(q)
 
     def getState(self):
+        """
+        col #       State
+        0           moving arm 1 position
+        1           moving arm 2 position
+        2           extension arm position
+        3           Gripper's Palm position
+        4           Gripper's left finger position
+        5           Gripper's right finger position
+        6           Angle of Rotational Joint
 
-        def getStateObjects():
-            objects = self.factory.getStateBoxes()
-            return objects
+        7           Target Object position
+        8           Target Object angle
+        9           Target Object linear velocity
+        10          Target Object angular velocity
+        """
+        boxes_state = self.table.getBoxesState()
+        target_state = self.table.getTargetState()
+        arm_state = self.arm.getRobotArmStates()
 
-        '''def getStateArm():
-            gripperState = self.gripper.getState()
-            jointAngles = self.arm.getCurrentAngles()
-            return np.array([gripperState, jointAngles], dtype=object)''' 
-        def getStateArm():
-            gripperState = np.array([self.gripper.getState()])
-            jointAngles = self.arm.getCurrentAngles()
-            return np.hstack((gripperState, jointAngles))
-            
-        #state = [getStateObjects(), getStateArm()]
-        #state = np.array(state, dtype=object)
-        state = np.hstack((getStateObjects(), getStateArm()))
+        target_position = np.array([target_state[0][0][0],target_state[0][0][1]])
+        # boxes_position = np.array([boxes_state[0][0], target_state[0][1]])
+        state = np.vstack((arm_state, target_position))
+
         return state
         
 

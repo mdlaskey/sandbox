@@ -17,7 +17,10 @@ import IPython
 
 
 class RobotGripper:
-    def __init__(self, transform, height, width, scale):
+    def __init__(self, transform, height, width, scale, gripper_motor_speed=20.0, gripper_max_force=90.0):
+        self.gripper_motor_speed_ = gripper_motor_speed
+        self.gripper_max_force_ = gripper_max_force
+
         self.transform_ = transform
         self.transform_ = b2Transform()
         self.transform_.angle = transform.angle
@@ -76,7 +79,7 @@ class RobotGripper:
         # Add stationary joint between the base and top
         self.jointBase_ = RobotPrismaticJoint(axis=(1,0), lower_translation=9.0, 
                                               upper_translation=9.0,
-                                              motor_force=90.0, enable_motor=True)
+                                              max_motor_force=self.gripper_max_force_, enable_motor=True)
 
         # Gripper Left
         # Base Finger
@@ -105,7 +108,7 @@ class RobotGripper:
 
         self.jointLeftFinger_ = RobotPrismaticJoint(axis=(1,0), lower_translation=9.0, 
                                                     upper_translation=9.0,
-                                                    motor_force=90.0, enable_motor=True)
+                                                    max_motor_force=self.gripper_max_force_, enable_motor=True)
 
         # Gripper Right
         # Base
@@ -128,16 +131,16 @@ class RobotGripper:
 
         self.jointRightFinger_ = RobotPrismaticJoint(axis=(1,0), lower_translation=9.0, 
                                                     upper_translation=9.0,
-                                                    motor_force=90.0, enable_motor=True)
+                                                    max_motor_force=self.gripper_max_force_, enable_motor=True)
 
 
 
         self.jointLeft_ = RobotPrismaticJoint(axis=(1,0), lower_translation=0.0, 
                                               upper_translation=self.lengthPalm_,
-                                              motor_force=180.0, enable_motor=True)
+                                              max_motor_force=180.0, enable_motor=True)
         self.jointRight_ = RobotPrismaticJoint(axis=(1,0), 
                                                lower_translation=-(self.lengthPalm_),
-                                               upper_translation=0.0, motor_force=180.0,
+                                               upper_translation=0.0, max_motor_force=self.gripper_max_force_,
                                                enable_motor=True)
 
     def addToWorld(self, world):
@@ -206,16 +209,15 @@ class RobotGripper:
 
     def Keyboard(self, key):
         if key == Keys.K_y:
-            leftVector = self.left_.GetWorldVector(localVector=(500,0))
-            rightVector = self.right_.GetWorldVector(localVector=(-500,0))
-            self.left_.ApplyForce(leftVector, self.left_.worldCenter, True)
-            self.right_.ApplyForce(rightVector, self.right_.worldCenter, True)
+            self.jointLeft_.setMotorSpeed(20)
+            self.jointRight_.setMotorSpeed(-20)
         if key == Keys.K_i:
-            leftVector = self.left_.GetWorldVector(localVector=(-500,0))
-            rightVector = self.right_.GetWorldVector(localVector=(500,0))
-            self.left_.ApplyForce(leftVector, self.left_.worldCenter, True)
-            self.right_.ApplyForce(rightVector, self.right_.worldCenter, True)
+            self.jointLeft_.setMotorSpeed(-20)
+            self.jointRight_.setMotorSpeed(20)
 
+    def applyControl(self, gripper_control):
+        self.jointLeft_.setMotorSpeed(gripper_control * self.gripper_motor_speed_)
+        self.jointRight_.setMotorSpeed(gripper_control * -self.gripper_motor_speed_)
 
 class PController:
     def __init__(self):
@@ -242,8 +244,8 @@ class RobotRevoluteJoint:
         self.bodyA_ = bodyA
         self.bodyB_ = bodyB
         self.rj_ = world.CreateRevoluteJoint(
-            bodyA=bodyA.getBody(),
-            bodyB=bodyB.getBody(),
+            bodyA=bodyA,
+            bodyB=bodyB,
             anchor=self.anchor_,
             lowerAngle=self.lowerAngle_,
             upperAngle=self.upperAngle_,
@@ -273,6 +275,10 @@ class RobotRevoluteJoint:
         self.rj_.motorSpeed = new_speed
         return self.rj_.motorSpeed
 
+    def increaseMotorSpeed(self, add_speed):
+        self.rj_.motorSpeed += add_speed
+        return self.rj_.motorSpeed
+
     def getCurrentAngleDegrees(self):
         return self.rj_.angle*180/math.pi
 
@@ -280,11 +286,14 @@ class RobotRevoluteJoint:
         return self.rj_.angle
 
     def update(self):
-        if round(self.getCurrentAngleDegrees(), 2) != round(self.getTargetAngleDegrees(), 2):
-            p_value = self.controller_.control(self.rj_.angle, self.targetAngle_)
-            motorSpeed = self.setMotorSpeed(p_value*20)
-        else:
-            self.setMotorSpeed(0.0)
+        self.setMotorSpeed(0.0)
+
+    # def update(self):
+    #     if round(self.getCurrentAngleDegrees(), 2) != round(self.getTargetAngleDegrees(), 2):
+    #         p_value = self.controller_.control(self.rj_.angle, self.targetAngle_)
+    #         motorSpeed = self.setMotorSpeed(p_value*20)
+    #     else:
+    #         self.setMotorSpeed(0.0)
 
     def getParameterMatrix(self, angle):
         t_x = -math.sin(angle) * self.bodyB_.getHeight()
@@ -296,13 +305,13 @@ class RobotRevoluteJoint:
 
 class RobotPrismaticJoint():
     def __init__(self, axis=(1,0), lower_translation=0.0, upper_translation=0.0,
-                 enable_limit=True, motor_force=0.0, enable_motor=True, roc=0.03,
+                 enable_limit=True, max_motor_force=0.0, enable_motor=True, roc=0.03,
                  gripper_state=0.0, limit=None):
         self.axis_ = axis
         self.lowerTranslation_ = lower_translation
         self.upperTranslation_ = upper_translation
         self.enableLimit_ = enable_limit
-        self.motorForce_ = motor_force
+        self.maxMotorForce_ = max_motor_force
         self.enableMotor_ = enable_motor
         self.roc = roc
         self.controller_= PController()
@@ -310,19 +319,33 @@ class RobotPrismaticJoint():
         
         self.gripperState = gripper_state
 
-    def addToWorld(self, world, bodyA, bodyB):
-        self.pj_ = world.CreatePrismaticJoint(
-            bodyA=bodyA,
-            bodyB=bodyB,
-            anchor=bodyB.worldCenter,
-            axis=self.axis_,
-            lowerTranslation=self.lowerTranslation_,
-            upperTranslation=self.upperTranslation_,
-            enableLimit=self.enableLimit_,
-            maxMotorForce=self.motorForce_,
-            motorSpeed=0.0,
-            enableMotor=self.enableMotor_
-            )
+    def addToWorld(self, world, bodyA, bodyB, anchor=None):
+        if anchor is None:
+            self.pj_ = world.CreatePrismaticJoint(
+                bodyA=bodyA,
+                bodyB=bodyB,
+                anchor=bodyB.worldCenter,
+                axis=self.axis_,
+                lowerTranslation=self.lowerTranslation_,
+                upperTranslation=self.upperTranslation_,
+                enableLimit=self.enableLimit_,
+                maxMotorForce=self.maxMotorForce_,
+                motorSpeed=0.0,
+                enableMotor=self.enableMotor_
+                )
+        else:
+            self.pj_ = world.CreatePrismaticJoint(
+                bodyA=bodyA,
+                bodyB=bodyB,
+                anchor=anchor,
+                axis=self.axis_,
+                lowerTranslation=self.lowerTranslation_,
+                upperTranslation=self.upperTranslation_,
+                enableLimit=self.enableLimit_,
+                maxMotorForce=self.motorForce_,
+                motorSpeed=0.0,
+                enableMotor=self.enableMotor_
+                )
 
     def getTranslation(self):
         return self.pj_.translation
@@ -331,6 +354,10 @@ class RobotPrismaticJoint():
         return self.pj_.speed
 
     def getMotorSpeed(self):
+        return self.pj_.motorSpeed
+
+    def setMotorSpeed(self, new_speed):
+        self.pj_.motorSpeed = new_speed
         return self.pj_.motorSpeed
     
     def getState(self):
@@ -352,18 +379,21 @@ class RobotPrismaticJoint():
             self.gripperState -= self.roc
 
     def update(self):
-        xp = [0, 1]
-        if (self.upperTranslation_ <= 0.0):
-            fp = [self.upperTranslation_, self.lowerTranslation_/2.0]
-        else:
-            fp = [self.lowerTranslation_, self.upperTranslation_/2.0]
-        i = np.interp(self.gripperState, xp, fp)
+        self.pj_.motorSpeed=0.0
 
-        if round(self.pj_.translation, 2) != round(i, 2):  
-            p_value = self.controller_.control(self.pj_.translation, i)
-            self.pj_.motorSpeed = p_value * 1.5
-        else:
-            self.pj_.motorSpeed=0.0
+    # def update(self):
+    #     xp = [0, 1]
+    #     if (self.upperTranslation_ <= 0.0):
+    #         fp = [self.upperTranslation_, self.lowerTranslation_/2.0]
+    #     else:
+    #         fp = [self.lowerTranslation_, self.upperTranslation_/2.0]
+    #     i = np.interp(self.gripperState, xp, fp)
+
+    #     if round(self.pj_.translation, 2) != round(i, 2):  
+    #         p_value = self.controller_.control(self.pj_.translation, i)
+    #         self.pj_.motorSpeed = p_value * 1.5
+    #     else:
+    #         self.pj_.motorSpeed=0.0
 
 
 
@@ -414,7 +444,7 @@ class Polygon:
 
         if vertices == None:
             self.radius = radius
-            self.polyShape_ = b2CircleShape(pos=self.transform_.position,
+            self.polyShape_ = b2CircleShape(pos=(0.0,0.0),
                                             radius=self.radius)
             
         else:
@@ -446,14 +476,26 @@ class Polygon:
  
         # re-add to the world
         world.DestroyBody(self.body_)
-        self.addToWorld(world, center=False, dynamic=dynamic)
+        self.addToWorld(world, center=False, dynamic=dynamic, kinematic=kinematic)
        
-    def addToWorld(self, world, center = False, dynamic=True):
+    def addToWorld(self, world, center = False, dynamic=True, kinematic=False):
         """ Add the polygon to the given world as a dynamic body """
-        if dynamic:
-            self.body_ = world.CreateDynamicBody(
+        if kinematic:
+            self.body_ = world.CreateKinematicBody(
                 angle=self.transform_.angle,
                 position=self.transform_.position,
+                linearDamping=self.linearDamping_,
+                angularDamping=self.angularDamping_,
+                fixtures=b2FixtureDef(
+                    shape=self.polyShape_,
+                    density=self.massDensity_,
+                    friction=self.friction_
+                    )
+                )
+        elif dynamic:
+            self.body_ = world.CreateDynamicBody(
+                angle=self.transform_.angle,
+                position=(self.transform_.position),
                 linearDamping=self.linearDamping_,
                 angularDamping=self.angularDamping_,
                 fixtures=b2FixtureDef(
