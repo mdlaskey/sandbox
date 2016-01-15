@@ -3,6 +3,7 @@
 Net/hdf/test.h5
 Net/hdf/train.h5
 legacy/
+*.gz
 *.solverstate
 *.caffemodel
 !Net/logs/saved/*/*.caffemodel
@@ -11,4 +12,5 @@ legacy/
 !Net/nets/*/logs/*.solverstate
 !Net/nets/*/logs/*/*.caffemodel
 !Net/nets/*/logs/*/*.solverstate
-
+*.ckpt
+*.mov

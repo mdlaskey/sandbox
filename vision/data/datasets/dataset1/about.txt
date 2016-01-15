@@ -1,0 +1,58 @@
+Created 12/9/2015
+
+Second original dataset collected via supervisor demonstration.
+Same task as previous.
+Controls and images were not altered by postprocessing.
+
+12-27-2015 23:15:29
+
+net: 
+weights: 
+12-27-2015 23:22:28
+
+net: 
+weights: 
+12-27-2015 23:22:35
+
+net: 
+weights: 
+12-27-2015 23:23:05
+
+net: 
+weights: 
+12-27-2015 23:23:55
+
+net: 
+weights: 
+12-27-2015 23:24:08
+
+net: 
+weights: 
+12-28-2015 19:17:48
+
+net: 
+weights: 
+12-28-2015 20:22:45
+
+net: 
+weights: 
+12-28-2015 20:42:37
+
+net: 
+weights: 
+12-28-2015 20:45:45
+
+net: 
+weights: 
+12-28-2015 20:45:58
+
+net: 
+weights: 
+12-28-2015 20:48:15
+
+net: 
+weights: 
+12-28-2015 20:53:57
+
+net: 
+weights: 

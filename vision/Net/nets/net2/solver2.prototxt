@@ -4,14 +4,14 @@ net: "/Users/JonathanLee/Desktop/sandbox/vision/Net/nets/net2/trainer2.prototxt"
 test_iter: 1
 test_interval: 1
 #base_lr: 0.00001
-base_lr: .003
+base_lr: .001
 lr_policy: "step"
 gamma: .1
-stepsize: 150
+stepsize: 250
 display: 1
 max_iter: 300
 # Lower momentum?
-#momentum: 0.9
+momentum: 0.9
 #momentum: 0.00
 #weight_decay: 0.0005
 

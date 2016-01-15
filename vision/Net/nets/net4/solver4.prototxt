@@ -7,9 +7,9 @@ test_interval: 1
 base_lr: .001
 lr_policy: "step"
 gamma: 0.001
-stepsize: 150
+stepsize: 250
 display: 1
-max_iter: 300
+max_iter: 350
 # Lower momentum?
 #momentum: 0.9
 momentum: 0.9

@@ -1,0 +1,4 @@
+01-14-2016 16:19:48
+
+net: ./net/nets/net2/model2.prototxt
+weights: ./net/nets/net2/weights_iter_240.caffemodel

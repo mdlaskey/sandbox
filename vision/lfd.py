@@ -1,163 +1,135 @@
-from Net.pipeline.bincam import BinaryCamera
-import numpy as np
-import caffe
-from Net import constants
-import time
-import cv2
-import os
+from options import Options
+from dataset import Dataset
 import datetime
+import caffe
+import time
+import numpy as np
 
-def test(options, c, izzy, t):
-    """
-    params - options, controller, izzy, turntable
-    """
-    bincam = BinaryCamera('./net/pipeline/meta.txt')
-    bincam.open()
+class LFD():
 
-    while True:
-        if c.shouldOverride():
-            print "should override"
-        frame = bincam.read_frame(show=options.show)
-        controls = c.getUpdates()
-        print "test: " + str(controls)
-        if controls is None:
-            print "Done"
-            izzy.stop()
-            break
-        controls[1] = 0
-        controls[3] = 0
-        izzy.control(controls)
-        t.control([controls[5]])
-        time.sleep(.05)
+    def __init__(self, bincam, izzy, turntable, controller, options=Options()):
+        self.bc = bincam
+        self.izzy = izzy
+        self.turntable = turntable
+        self.c = controller
+        self.options = options
 
 
 
-def deploy(options, c, izzy, t):
-    """
-    params - options, controller, izzy, turntable    
-    """
-    bincam = BinaryCamera('./net/pipeline/meta.txt')
-    bincam.open()
-    net = caffe.Net(options.model_path, options.weights_path, caffe.TEST)
-    
-    dataset_path = get_dataset("supervisor_12-16-2015_14h42m41s")
-    writer = open(dataset_path + "controls.txt", 'w+')
-    i = next_data_index(dataset_path)
-    try:
-        while True:
-            #supervisor takes control
-            if c.shouldOverride():
-                controls = c.getUpdates()
-                controls[1] = 0
-                controls[3] = 0
+
+    def test(self):
+        try:
+            while True:
+                if self.c.override():
+                    print "supervisor override"
+                frame = self.bc.read_binary_frame(show=self.options.show, record=self.options.record)
+                controls = self.c.getUpdates()
+                self.update_gripper(controls)
+                
+                print "test: " + str(controls)
+                time.sleep(0.03)
+        except KeyboardInterrupt:
+            pass
+
+
+
+
+
+    def deploy(self, dataset_name=""):
+        net = caffe.Net(self.options.model_path, self.options.weights_path, caffe.TEST)        
+        
+        if not dataset_name:
+            dataset = Dataset.create_ds(self.options, prefix="deploy")
+        else:           
+            dataset = Dataset.get_ds(self.options, dataset)
+
+        try:
+            while True:
+                controls = self.c.getUpdates()
+                if self.c.override():
+                    # supervised
+                    controls = self.c.getUpdates()
+                    self.update_gripper(controls)
+                    
+                    controls = self.controls2simple(controls)
+                    if not all(int(c) == 0 for c in controls):
+                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record)
+                        dataset.put(frame, controls)
+                    
+                    print "supervisor: " + str(controls)
+                else:
+                    # autonomous
+                    frame = self.bc.read_binary_frame(record=self.options.record)
+                    data4D = np.zeros([1, 3, 125, 125])
+                    frame = frame / 255.0
+                    data4D[0,0,:,:] = frame
+        	    data4D[0,1,:,:] = frame
+        	    data4D[0,2,:,:] = frame
+
+                    net.forward_all(data=data4D)
+                    net_controls = net.blobs['out'].data.copy()[0]
+                    print controls
+                    controls = self.net2controls(net_controls)
+                    
+                    self.update_gripper(controls)
+                    
+                time.sleep(0.03)
+        except KeyboardInterrupt:
+            pass
+
+        if self.options.record:
+            self.bc.save_recording()
+
+
+    def deploytf(self, dataset_name=''):
+        raise NotImplementedError
+
+
+
+    def learn(self, dataset_name=''):
+        
+        if not dataset_name:
+            dataset = Dataset.create_ds(self.options, prefix='learn')
+        else:               
+            dataset = Dataset.get_ds(self.options, dataset)
+
+        try:
+            while True:
+                controls = self.c.getUpdates()
+                self.update_gripper(controls)
+
+                controls = self.controls2simple(controls)
+                if not all(int(c) == 0 for c in controls):
+                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record)
+                        dataset.put(frame, controls)
+                
                 print "supervisor: " + str(controls)
-                izzy.control(controls)
-                t.control([controls[5]])
+                time.sleep(0.05)
                 
-                simpleControls = [controls[0], controls[2], controls[4], controls[5]]
-                if not all(int(sc)==0 for sc in simpleControls):
-                    frame = bincam.read_frame(show=options.show, record=options.record)                
-                    filename = "img_" + str(i) + ".jpg"
-                    save_example(writer, dataset_path, filename, frame, simpleControls)
-                    i+=1
-            
-            # net in control
-            else:
-                # bincam frames go from 0 to 255 in 1 dim
-                # assuming 125x125 images
-                frame = bincam.read_binary_frame(record=options.record)
-                data4D = np.zeros([1, 3, 125, 125])
-                frame = frame / 255.0
-                data4D[0,0,:,:] = frame
-    	        data4D[0,1,:,:] = frame
-    	        data4D[0,2,:,:] = frame
-              
-                net.forward_all(data=data4D)
-                controls = net.blobs['out'].data.copy()[0]
-                
-                # scale controls and squash small controls
-                controls = revert_controls(controls, options)
-                controls[1] = 0
-                controls[3] = 0
-                print controls
-                izzy.control(controls)
-                t.control([controls[5]])
-
-            c.getUpdates()
-            time.sleep(.05)
-            
-    except KeyboardInterrupt:
-        pass
-    return bincam
-    
-
-
-def learn(options, c, izzy, t):
-    """
-    params - options, controller, izzy, turntable    
-    """
-    bincam = bincam.BinaryCamera('./net/pipeline/meta.txt')
-    bincam.open()
-
-    dataset_path = create_new_dataset(prefix="supervisor")
-    writer = open(dataset_path + "controls.txt", 'w+')
-
-    i = 0
-    while True:
-        controls = c.getUpdates()     
-        print controls
+        except KeyboardInterrupt:
+            pass
         
+        if self.options.record:
+            self.bc.save_recording()
+
+
+
+
+    def update_gripper(self, controls):
         controls[1] = 0
         controls[3] = 0
-        izzy.control(controls)
-        t.control([controls[5]])
-        
-        # store this however you please. (concatenate into array?)
-        simpleControls = [controls[0], controls[2], controls[4], controls[5]]
-        if not all(int(sc)==0 for sc in simpleControls):
-            frame = bincam.read_frame(show=options.show)            
-            filename = "img_" + str(i) + ".jpg"
-            save_example(writer, dataset_path, filename, frame, simpleControls)
-            i+=1
-        time.sleep(.05)
+        self.izzy.control(controls)
+        self.turntable.control([controls[5]])
 
-def get_dataset(name=''):
-    datasets = constants.ROOT + "data/"
-    if len(name) == 0:
-        return create_new_dataset()
-    else:
-        dataset_path = datasets + name + "/"
-        if not os.path.exists(dataset_path):
-            os.makedirs(dataset_path)
-        return dataset_path
-
-def next_data_index(dataset_path, i=0):
-    path = dataset_path + "img_" + str(i) + ".jpg"
-    while os.path.isfile(path):
-        i += 1
-        path = dataset_path + "img_" + str(i) + ".jpg"
-    return i
-
-def create_new_dataset(prefix="supervisor"):
-    datasets = constants.ROOT + "data/"
-    dataset_path = datasets + prefix + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + "/"
-    os.makedirs(dataset_path)
-    return dataset_path
-
-def save_example(writer, dataset_path, filename, frame, controls):
-    cv2.imwrite(dataset_path + filename, frame)
-    controls_string = ""
-    for c in controls:
-        controls_string += " " + str(c)
-    writer.write(filename + controls_string + '\n')
+    def net2controls(self, net_controls):
+        """ convert net output (1d nparray) to izzy controls """
+        for i in range(len(net_controls)):
+            net_controls[i] = (net_controls[i] - self.options.translations[i]) * self.options.scales[i] * 1.5
+            if abs(net_controls[i]) < self.options.drift:
+                net_controls[i] = 0.0
+        return [net_controls[0], 0.0, net_controls[1], 0.0, net_controls[2], net_controls[3]]
 
 
-
-def revert_controls(controls, options):
-    for i in range(len(controls)):
-        controls[i] = (controls[i] - options.translations[i]) * options.scales[i] * 1.5
-        if abs(controls[i]) < options.drift:
-            controls[i] = 0.0
-    return [controls[0], 0.0, controls[1], 0.0, controls[2], controls[3]]
-
-
+    def controls2simple(self, controls):
+        """ convert raw izzy controls to net output (no trans/scaling) """
+        return [controls[0], controls[2], controls[4], controls[5]]

@@ -1,5 +1,0 @@
-Created 11/25/2015
-
-This was the first, original dataset collected via supervisor demonstration.
-The task was to locate, grasp and then pull back the cylindrical spool.
-These controls and images have not been altered by postprocessing.
