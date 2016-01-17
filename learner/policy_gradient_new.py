@@ -44,7 +44,7 @@ class Policy_Gradient:
 		return np.array(q)
 
 
-	def gradient_update(self, traj, rewards, step_size=0.0001, momentum=0.0, normalize=True):
+	def gradient_update(self, traj, rewards, step_size=0.01, momentum=0.0, normalize=True):
 		"""
 		Estimates and applies gradient update according to a policy.
 
@@ -77,47 +77,20 @@ class Policy_Gradient:
 				curr_action = curr_traj[j][1].T
 				curr_q_val = q[j]
 
-				#print "curr_q_val", curr_q_val
+				#print "q", curr_q_val
 				# Calculate gradients
-				#print "curr_state: {}".format(curr_state)
-				#print "curr_action: {}".format(curr_action)
 				weight_update_vals = self.sess.run(self.weight_grads, \
 					feed_dict={self.input_state: curr_state, self.observed_action: curr_action, self.q_val: curr_q_val})
 				bias_update_vals = self.sess.run(self.bias_grads, \
 					feed_dict={self.input_state: curr_state, self.observed_action: curr_action, self.q_val: curr_q_val}) 
-				# print ""
-				# print "weight_update_vals: {}".format(weight_update_vals)
-				# print "bias_update_vals: {}".format(bias_update_vals)
-				# print ""
-				# print "weight_grads shape: {}".format([self.sess.run(tf.shape(x), feed_dict={self.input_state: curr_state, self.observed_action: curr_action, self.q_val: curr_q_val}) for x in self.weight_grads])
-				# print "bias_grads shape: {}".format([self.sess.run(tf.shape(x), feed_dict={self.input_state: curr_state, self.observed_action: curr_action, self.q_val: curr_q_val}) for x in self.bias_grads])
-				if np.isnan(weight_update_vals).any() or np.isnan(bias_update_vals).any():
-					# print "self.weights (before): {}".format(self.sess.run(self.weights))
-					# print "self.biases (before): {}".format(self.sess.run(self.biases))
-					# print "self.layer_1: {}".format(self.sess.run(self.layer_1, feed_dict={self.input_state: curr_state}))
-					# print "self.layer_2: {}".format(self.sess.run(self.layer_2, feed_dict={self.input_state: curr_state}))
-					# print "weight_update_vals: {}".format(weight_update_vals)
-					# print "bias_update_vals: {}".format(bias_update_vals)
-					# print "curr_state: {}".format(curr_state)
-					# print "curr_action: {}".format(curr_action)
-					# print "curr_q_val", curr_q_val
-					# raise Exception("Error: NaN value encountered in gradient update")
-					print "Warning: NaN value encountered. Skipping current update."
-					continue
 
 				weight_update += np.array(weight_update_vals) / np.float(iters)
 				bias_update += np.array(bias_update_vals) / np.float(iters)
-
-		# print "weight_update: {}".format(weight_update)
-		# print "bias_update: {}".format(bias_update)
 		
-		# print "self.weights (before): {}".format(self.sess.run(self.weights))
-		# print "self.biases (before): {}".format(self.sess.run(self.biases))
 		# Update weights
 		for j in range(len(self.weights)):
 			# Normalize gradient
 			update_val = weight_update[j]
-			#print "update_val_{}: {}".format(j, update_val)
 			if normalize:
 				norm = la.norm(weight_update[j])
 				if norm != 0:
@@ -132,7 +105,6 @@ class Policy_Gradient:
 		for j in range(len(self.biases)):
 			# Normalize gradient
 			update_val = bias_update[j]
-			#print "update_val_{}: {}".format(j, update_val)
 			if normalize:
 				norm = la.norm(bias_update[j])
 				if norm != 0:
@@ -143,12 +115,6 @@ class Policy_Gradient:
 			update = tf.assign(self.biases[j], self.biases[j] + step_size * update_val)
 			self.sess.run(update)
 
-		# print "weight_update: {}".format(weight_update)
-		# print "bias_update: {}".format(bias_update)
-
-		# print "self.weights (after): {}".format(self.sess.run(self.weights))
-		# print "self.biases (after): {}".format(self.sess.run(self.biases))
-
 		self.prev_weight_update = weight_update
 		self.prev_bias_update = bias_update
 		return None
@@ -157,7 +123,6 @@ class Policy_Gradient:
 	def init_neural_net(self, n_inputs=2, n_outputs=2, n_hidden_1=2, n_hidden_2=2):
 		"""
 		Sets up neural network for policy gradient.
-		Assumes output layer represents center of Gaussian.
 
 		Input:
 		n_inputs: int
@@ -187,25 +152,22 @@ class Policy_Gradient:
 				  tf.Variable(tf.random_normal([n_outputs]))]
 
 		# Construct model
-		self.intermed_1 = tf.add(tf.matmul(self.input_state, self.weights[0]), self.biases[0])
-		self.layer_1 = tf.nn.relu(tf.add(tf.matmul(self.input_state, self.weights[0]), self.biases[0])) #Hidden layer with RELU activation
-		self.layer_2 = tf.nn.relu(tf.add(tf.matmul(self.layer_1, self.weights[1]), self.biases[1])) #Hidden layer with RELU activation
-		self.output_mean = tf.matmul(self.layer_2, self.weights[2]) + self.biases[2]
+		layer_1 = tf.nn.relu(tf.add(tf.matmul(self.input_state, self.weights[0]), self.biases[0])) #Hidden layer with RELU activation
+		layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1, self.weights[1]), self.biases[1])) #Hidden layer with RELU activation
+		self.output_mean = tf.matmul(layer_2, self.weights[2]) + self.biases[2]
 
 		 # Output probability layer
-		self.log_prob_output = tf.mul(tf.constant(-0.5), tf.square(tf.global_norm([self.output_mean - self.observed_action])))
-		self.prob_q = tf.mul(self.q_val, self.log_prob_output)
+		log_prob_output = tf.mul(tf.constant(-0.5), tf.square(tf.global_norm([self.output_mean - self.observed_action])))
+		prob_q = tf.mul(self.q_val, log_prob_output)
 
 		# Gradients
-		self.weight_grads = tf.gradients(self.prob_q, self.weights)
-		self.bias_grads = tf.gradients(self.prob_q, self.biases)
+		self.weight_grads = tf.gradients(prob_q, self.weights)
+		self.bias_grads = tf.gradients(prob_q, self.biases)
 
 		# Initialize variables, session
 		init = tf.initialize_all_variables()
 		self.sess = tf.Session()
 		self.sess.run(init)
-
-		
 
 	def get_action(self, state):
 		"""
@@ -222,16 +184,9 @@ class Policy_Gradient:
 		state = state.T
 		curr_output_mean = self.sess.run(self.output_mean, feed_dict={self.input_state: state})
 		action = meanstd_sample(curr_output_mean)
-		# print "self.weights: {}".format(self.sess.run(self.weights))
-		# print "self.biases: {}".format(self.sess.run(self.biases))
-		# print "state: {}".format(state)
-		# print "self.intermed_1: {}".format(self.sess.run(self.intermed_1, feed_dict={self.input_state: state}))
-		# print "self.layer_1: {}".format(self.sess.run(self.layer_1, feed_dict={self.input_state: state}))
-		# print "self.layer_2: {}".format(self.sess.run(self.layer_2, feed_dict={self.input_state: state}))
-		# print "action: {}".format(action)
 		return action
 
-def meanstd_sample(mean, std=1.0):
+def meanstd_sample(mean, std=0.001):
 	"""
 	Samples an action based on
 	the input probability distribution.
@@ -247,5 +202,7 @@ def meanstd_sample(mean, std=1.0):
 	sample_action: array-like
 		Action sampled from given distribution.
 	"""
+	#print "mean", mean
 	sample_action = mean + std * np.random.randn(*mean.shape)
+	#print "sample_action", sample_action
 	return sample_action.T

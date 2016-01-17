@@ -58,29 +58,27 @@ class Testbed:
 		"""
 		return -la.norm(s - self.goal_state)
 
-	def run_test(self, iters=100, iter_len=10, traj_len=10):
+	def run_test(self, epochs=200, iters=100, traj_len=10):
 		"""
 		Runs learner over example environment 
 		and returns results.
 
 		Parameters:
-		iter_len: int
+		iters: int
 			Number of iterations.
 		traj_len: int
 			Length of each sample trajectory.
 		"""
 		
 		mean_rewards = []
-		for i in range(iters):
+		for i in range(epochs):
 			trajs = []
 			rewards = []
-			for j in range(iter_len):
+			for j in range(iters):
 				states = []
 				actions = []
 				curr_rewards = []
 				curr_state = np.zeros((self.A.shape[0], 1))
-
-				# Rolls out single trajectory
 				for k in range(traj_len):
 					# Get action from learner
 					curr_action = self.learner.get_action(curr_state)
@@ -93,11 +91,10 @@ class Testbed:
 					# Update state
 					curr_state = self.calculate_next_state(curr_state, curr_action)
 
-				# Append trajectory/rewards
+				# Apply policy gradient iteration
 				trajs.append(zip(states, actions))
 				rewards.append(curr_rewards)
 
-			# Apply policy gradient iteration
 			self.learner.gradient_update(np.array(trajs), np.array(rewards))
 			mean_rewards.append(np.mean([reward_list[-1] for reward_list in rewards]))
 
@@ -109,7 +106,7 @@ class Testbed:
 		plt.xlabel('Number of Iterations')
 		plt.ylabel('Mean Ending Distance from Goal')
 		plt.title('Policy Gradient Learning')
-		plt.savefig("policy_gradient_{}_iters_{}_iterlen.pdf".format(iters, iter_len))
+		plt.savefig("policy_gradient.pdf")
 
 	def run_step(self, action):
 		"""
