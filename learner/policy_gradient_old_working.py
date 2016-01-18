@@ -174,7 +174,7 @@ class Policy_Gradient:
 		"""
 		state = state.T
 		curr_output_mean = self.sess.run(self.output_mean, feed_dict={self.input_state: state})
-		action = meanstd_sample(curr_output_mean, std=0.01)
+		action = meanstd_sample(curr_output_mean, std=1)
 		return action
 
 def meanstd_sample(mean, std=0.001):

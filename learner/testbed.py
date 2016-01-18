@@ -58,7 +58,7 @@ class Testbed:
 		"""
 		return -la.norm(s - self.goal_state)
 
-	def run_test(self, iters=100, iter_len=10, traj_len=10):
+	def run_test(self, iters=100, iter_len=100, traj_len=10):
 		"""
 		Runs learner over example environment 
 		and returns results.
