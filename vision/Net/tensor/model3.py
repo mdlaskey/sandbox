@@ -15,7 +15,8 @@ import tensorflow as tf
 import inputdata
 import random
 from tensornet import TensorNet
-
+import time
+import datetime
 
 
 class NetThree(TensorNet):
@@ -29,9 +30,10 @@ class NetThree(TensorNet):
 
 
     def __init__(self):
-        self.prefix = "net3"
+        self.dir = "./net3/"
         self.name = "net3"
 
+        self.recent = None
 
         self.x = tf.placeholder('float', shape=[None, 125, 125, 1])
         self.y_ = tf.placeholder("float", shape=[None, 4])
@@ -61,33 +63,35 @@ class NetThree(TensorNet):
 
         self.sess = tf.Session()
 
-    def train(self, iterations):
-        
+    def asdf(self):
+        print "hi world"
+
+    def optimize(self, iterations, batch_size=100):
         with self.sess.as_default():
             try:
+                data = inputdata.InputData(self.TRAIN_PATH, self.TEST_PATH)
                 self.sess.run(tf.initialize_all_variables())
                 for i in range(iterations):
-                    batch = data.next_train_batch(self.batch_size)
+                    batch = data.next_train_batch(batch_size)
                     ims, labels = batch
-                    batch_loss = self.loss.eval(feed_dict={x: ims, y_:labels})
-                    print "[Iteration: " + str(i) + "] Training loss: " + str(batch_loss)
 
-                    self.train.run(feed_dict={x: ims, y_:labels})
-
-                    time.sleep(.3)  # to avoid ridiculous memory consumption
+                    print("[ Iteration "  + str(i) + "] "),
+                    batch_loss = self.loss.eval(feed_dict={self.x: ims, self.y_:labels})
+                    print "Training loss: " + str(batch_loss)
+                    
+                    self.train.run(feed_dict={self.x: ims, self.y_:labels})
+                    time.sleep(1.1)
 
             except KeyboardInterrupt:
                 pass
+            
+            self.save()
+            print "Optimize done."
+    
 
-         
-    def save(self):
-        raise NotImplementedError
-
-    def load(self):
-        raise NotImplementedError
 
     def deploy(self, var_path, sess=None):
-        
+        raise NotImplementedError
 
     def weight_variable(self, shape):
         initial = tf.truncated_normal(shape, stddev=0.1)
@@ -99,10 +103,12 @@ class NetThree(TensorNet):
 
     def conv2d(self, x, W):
         return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-
+    
+    def open(self):
+        self.sess = tf.Session()
 
     def close(self):
         self.sess.close()
     
-NetThree()
-
+net = NetThree()
+net.load()
