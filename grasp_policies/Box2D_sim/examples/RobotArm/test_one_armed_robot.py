@@ -377,7 +377,7 @@ class GraspingWorld(Framework):
 
         target_position = np.array([target_state[0][0][0],target_state[0][0][1]])
         # boxes_position = np.array([boxes_state[0][0], target_state[0][1]])
-        state = np.vstack((arm_state, target_position))
+        state = np.vstack((arm_state))
 
         return state
         

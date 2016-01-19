@@ -40,8 +40,8 @@ big_theta = [100.0, 60.0, 90.0, 30.0, 500.0, 900.0, 80.0, 90.0, 120.0, 500.0, 90
 U = np.array([np.array([0.0, 0.0, 0.0, -11.0]),
 				np.array([0.0, 20.0, -70.0, 77.0])])
 
-X = np.array([np.array([1.0, 7.0, 1.0, -5.0, 4.0, 10.0]),
-				np.array([6.0, 3.0, -2.0, 9.0, -1.0, -2.0])])
+X = np.array([np.array([1.0, 7.0, 1.0, -5.0, 4.0]),
+				np.array([6.0, 3.0, -2.0, 9.0, -1.0])])
 
 def Loss(theta):
 	# Number of Data points collected
@@ -98,7 +98,7 @@ def evalSim(u,theta):
 # We are using finite differences to compute the gradient with respect to the parameters 
 def computeGrad(): 
 	func = lambda theta: Loss(theta)
-	grad = nd.Gradient(func,step = 5e-10)
+	grad = nd.Gradient(func,step = 5000)
 	return grad
 
 #This part is where we descend into theta
@@ -137,5 +137,6 @@ def tuneArm():
 # 	theta = updateParameters(theta)
 # print Loss(init_theta)
 # print Loss(theta)
-print evalSim(U[1,:], init_theta)
-print evalSim(U[1,:], big_theta)
+# print evalSim(U[1,:], init_theta)
+# print evalSim(U[1,:], big_theta)
+print updateParameters(init_theta)
