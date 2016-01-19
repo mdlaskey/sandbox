@@ -1,36 +1,94 @@
 import tensorflow as tf
 import time
 import datetime
+import inputdata
+import logging
+import numpy as np
 
 class TensorNet():
+
+    ROOT = '/Users/JonathanLee/Desktop/sandbox/vision/'
+
+    TRAIN_PATH = ROOT + 'Net/hdf/train.txt'
+    TEST_PATH = ROOT + 'Net/hdf/test.txt'
 
     def __init__(self):
         raise NotImplementedError
 
-    def save(self):
-        print "Saving..."
-        saver = tf.train.Saver()
-        model_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
-        save_path = saver.save(self.sess, self.dir + model_name)
-        print "Saved model to " + save_path
-        self.recent = save_path
-        return
-
-    def load(self, path=None):
-        if not path and not self.recent:
-            raise Exception("No path to model variables specified")
+    def save(self, sess, save_path=None):
         
-        self.sess = tf.Session()
-        with self.sess.as_default():
-            self.sess.run(tf.initialize_all_variables())
+        self.log( "Saving..." )
+        saver = tf.train.Saver()
+        if not save_path:
+            model_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
+            save_path = self.dir + model_name
+        save_path = saver.save(sess, save_path)
+        self.log( "Saved model to " + save_path )
+        self.recent = save_path
+        return save_path
+
+
+
+    def load(self, var_path=None):
+        if not var_path:
+            raise Exception("No path to model variables specified")
+        print "Restoring existing net from " + var_path + "..."
+        sess = tf.Session()
+        with sess.as_default():
+            sess.run(tf.initialize_all_variables())
             saver = tf.train.Saver()
-            saver.restore(self.sess, path)
+            saver.restore(sess, var_path)
+        return sess
 
 
-    def optimize(self):
-        raise NotImplementedError
+    def optimize(self, iterations, path=None, batch_size=100):
+        if path:
+            sess = self.load(var_path=path)
+        else:
+            print "Initializing new variables..."
+            sess = tf.Session()
+            sess.run(tf.initialize_all_variables())
+            
+        logging.basicConfig(filename=self.dir + 'train.log', level=logging.DEBUG)
+        
+        try:
+            with sess.as_default():
+                print "Loading data..."
+                data = inputdata.InputData(self.TRAIN_PATH, self.TEST_PATH)
+                print "Data loaded."
+                for i in range(iterations):
+                    batch = data.next_train_batch(batch_size)
+                    ims, labels = batch
 
+                    feed_dict = { self.x: ims, self.y_: labels }
+                    if i % 5 == 0:
+                        batch_loss = self.loss.eval(feed_dict=feed_dict)
+                        self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
+                    self.train.run(feed_dict=feed_dict)
+                    time.sleep(1.1)
+                
+
+        except KeyboardInterrupt:
+            pass
+        
+        self.save(sess, save_path=path)
+        self.log( "Optimization done." )
     
+
+    def deploy(self, path, im):
+        """
+            accepts 3-channel image with pixel values from 
+            0-255 and returns controls in four element list
+        """
+        sess = self.load(var_path=path)
+        im = inputdata.im2tensor(im)
+        shape = np.shape(im)
+        im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
+        with sess.as_default():
+            print sess.run(self.y_out, feed_dict={self.x:im})
+        
+
+
     @staticmethod
     def reduce_shape(shape):
         """
@@ -40,3 +98,21 @@ class TensorNet():
         shape = [ x.value for x in shape ]
         f = lambda x, y: 1 if y is None else x * y
         return reduce(f, shape, 1)
+
+
+
+    def weight_variable(self, shape):
+        initial = tf.truncated_normal(shape, stddev=0.1)
+        return tf.Variable(initial)
+
+    def bias_variable(self, shape):
+        initial = tf.constant(.1, shape=shape)
+        return tf.Variable(initial)
+
+    def conv2d(self, x, W):
+        return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+
+    @staticmethod
+    def log(info):
+        print info
+        logging.debug(info)

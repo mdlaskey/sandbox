@@ -1,2 +1,2 @@
-model_checkpoint_path: "./net3/net3_01-18-2016_16h27m28s.ckpt"
-all_model_checkpoint_paths: "./net3/net3_01-18-2016_16h27m28s.ckpt"
+model_checkpoint_path: "net3/net3_01-19-2016_00h47m49s.ckpt"
+all_model_checkpoint_paths: "net3/net3_01-19-2016_00h47m49s.ckpt"

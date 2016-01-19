@@ -1,0 +1,2 @@
+model_checkpoint_path: "./net2/net2_01-19-2016_15h33m02s.ckpt"
+all_model_checkpoint_paths: "./net2/net2_01-19-2016_15h33m02s.ckpt"

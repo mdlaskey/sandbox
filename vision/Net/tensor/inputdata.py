@@ -8,8 +8,8 @@ class InputData():
     def __init__(self, train_path, test_path):
         self.i = 0
 
-        train_tups = parse(train_path, 800)
-        test_tups = parse(test_path, 200)
+        train_tups = parse(train_path, 4000) 
+        test_tups = parse(test_path, 800)
         
         self.train_data = []
         for path, labels in train_tups:
@@ -36,12 +36,15 @@ class InputData():
         self.i = self.i + n
         return list(batch[0]), list(batch[1])
     
-    
+    def next_test_batch(self):
+        batch = self.test_data
+        batch = zip(*batch)
+        return list(batch[0]), list(batch[1])
     
 def parse(filepath, stop=-1):
     """
         Parses file containing paths and labels into list
-        of the
+        of tupals in the form of:
         
         data =  [ 
                     (path, [label1, label2 ... ])
@@ -64,8 +67,9 @@ def parse(filepath, stop=-1):
 
 def im2tensor(im):
     """
-        convert 3d image (height, width, channel) where values range [0,255]
+        convert 3d image (height, width, 3-channel) where values range [0,255]
         to appropriate pipeline shape and values of either 0 or 1
+        cv2 --> tf
     """
     h, w, c = np.shape(im)
     zeros = np.zeros((h, w, 1))
