@@ -17,7 +17,7 @@ def reshape(img):
     return b
 
 
-def img2hdf(filename_prefix, cutoff=-1):
+def img2hdf(filename_prefix, output_path, cutoff=-1):
     """
     Retrieve images from textfile of paths and labels
     Write images and labels to datasets
@@ -39,5 +39,5 @@ def img2hdf(filename_prefix, cutoff=-1):
 
     # show where to find .h5 file by writing to prefix_hdf.txt
     lst = open(filename_prefix + '_hdf.txt', 'w+')
-    lst.write('/Users/JonathanLee/Desktop/sandbox/vision/Net/' + filename_prefix + '.h5')
+    lst.write(output_path)
     lst.close()

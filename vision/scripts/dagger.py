@@ -67,9 +67,9 @@ test_writer.close()
 
 # load images into h5 files
 print "converting train set to hdf..."
-hdf.img2hdf('./Net/hdf/train')
+hdf.img2hdf('Net/hdf/train', Options.hdf_dir + "train.h5")
 
 print "converting test set to hdf..."
-hdf.img2hdf('./Net/hdf/test')
+hdf.img2hdf('Net/hdf/test', Options.hdf_dir + "test.h5")
 
 print "Done."

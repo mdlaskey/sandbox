@@ -39,7 +39,7 @@ class NetTwo(TensorNet):
         self.train = self.train_step.minimize(self.loss)
 
  
-    
+        
 
 
 net = NetTwo()

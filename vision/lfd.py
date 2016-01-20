@@ -4,6 +4,7 @@ import datetime
 import caffe
 import time
 import numpy as np
+from net.tensor import net2
 
 class LFD():
 
@@ -83,7 +84,6 @@ class LFD():
 
     def deploytf(self, dataset_name=''):
         raise NotImplementedError
-
 
 
     def learn(self, dataset_name=''):

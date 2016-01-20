@@ -4,7 +4,7 @@ Instance variables are options (ok to change case by case externally)
 
 This is modeled after leveldb's options
 """
-
+import os
 class Options():
     translations = [0.0, 0.0, 0.0, 0.0]
     scales = [40.0, 120.0, 90.0, 100.0]
@@ -14,11 +14,14 @@ class Options():
     WIDTH = 420
     HEIGHT = 420
     
-    root_dir = '/Users/JonathanLee/Desktop/sandbox/vision/'
+    #root_dir = '/Users/JonathanLee/Desktop/sandbox/vision/'
+    root_dir = os.path.dirname(os.path.realpath(__file__)) + "/"
     data_dir = root_dir + 'data/'
     datasets_dir = data_dir + 'datasets/'
     frames_dir = data_dir + 'record_frames/'
     videos_dir = data_dir + 'record_videos/'
+    hdf_dir = root_dir + 'net/hdf/'
+
 
     def __init__(self):
         self.test = False
