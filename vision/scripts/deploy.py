@@ -1,6 +1,10 @@
 """
 Script that deploys net on gripper
 Net is capable of being overridden by xbox controller
+
+Uncomment or comment 'options.record = True' as you see fit.
+Specify the deploy model in 'options.model_path' and 'options.weights_path'
+
 """
 
 from gripper.TurnTableControl import *
