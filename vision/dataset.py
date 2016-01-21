@@ -47,7 +47,12 @@ class Dataset():
         path = options.datasets_dir + name
         os.makedirs(path)
         ds = Dataset(name, path, options)
-    
+        
+        with open('./meta.txt', 'r') as f_in:
+            lines = f_in.readlines()
+            with open(ds.path + "meta.txt", 'a+') as f_out:
+                f_out.writelines(lines)
+
         about = open(ds.path + "about.txt", 'a+')
         about.write(datetime.datetime.now().strftime('%m-%d-%Y %H:%M:%S'))
         about.write("\n\nnet: " + options.model_path + "\nweights: " + options.weights_path)

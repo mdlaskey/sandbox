@@ -17,7 +17,7 @@ bincam.open()
 options = Options()
 
 t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
-izzy = PyControl("/dev/cu.usbmodem14111",115200, .04, [0,0,0,0,0],[0,0,0]); # same with this
+izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]); # same with this
 c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
 
 #options.model_path = "./net/nets/net3/model3.prototxt"

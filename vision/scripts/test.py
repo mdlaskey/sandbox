@@ -1,5 +1,7 @@
 """
-Script that test runs gripper, show camera view with "python scripts/test.py -s"
+Script that test runs gripper
+Show camera view with "python scripts/test.py -s"
+Comment or uncomment "options.record = True"
 """
 
 from gripper.TurnTableControl import *
@@ -20,10 +22,11 @@ bincam = BinaryCamera('./meta.txt')
 bincam.open()
 
 options = Options()
+# options.record = True
 options.show = args['show']
 
 t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
-izzy = PyControl("/dev/cu.usbmodem14111",115200, .04, [0,0,0,0,0],[0,0,0]); # same with this
+izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]); # same with this
 c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
 
 lfd = LFD(bincam, izzy, t, c, options=options)
