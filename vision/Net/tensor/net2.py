@@ -42,6 +42,6 @@ class NetTwo(TensorNet):
         
 
 
-net = NetTwo()
-net.optimize(100, batch_size=300)
+#net = NetTwo()
+#net.optimize(100, batch_size=300)
 

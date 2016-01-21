@@ -20,3 +20,5 @@ DEBUG:root:[ Iteration 10 ] Training loss: 0.539573
 DEBUG:root:Saving...
 DEBUG:root:Saved model to ./net2/net2_01-19-2016_15h33m02s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.657901
+DEBUG:root:[ Iteration 5 ] Training loss: 0.64114
