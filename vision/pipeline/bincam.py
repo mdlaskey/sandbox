@@ -61,6 +61,7 @@ class BinaryCamera():
         self.d_squared = self.d * self.d
         f.close()
         self.recording = []
+        self.states = []
         
     def open(self):
         self.vc = cv2.VideoCapture(0)
@@ -72,18 +73,19 @@ class BinaryCamera():
     def is_open(self):
         return self.vc is not None and self.vc.isOpened()
 
-    def read_frame(self, show=False, record=False):
+    def read_frame(self, show=False, record=False, state=None):
         """ Returns cropped frame of raw video """
         rval, frame = self.vc.read()
         frame = frame[0+Options.OFFSET_Y:Options.HEIGHT+Options.OFFSET_Y, 0+Options.OFFSET_X:Options.WIDTH+Options.OFFSET_X]
         
         if record:
             self.recording.append(frame)
+            self.states.append(state)
         if show:
             cv2.imshow("preview", frame)
         return frame
         
-    def read_binary_frame(self, show=False, record=False):
+    def read_binary_frame(self, show=False, record=False, state=None):
         """ Returns a cropped binary frame of the video
         Significantly slower than read_frame due to the pipeline. """
         
@@ -93,6 +95,7 @@ class BinaryCamera():
         
         if record:
             self.recording.append(frame)
+            self.states.append(state)
         if show:
             cv2.imshow("binary", frame_binary)
             
@@ -128,7 +131,19 @@ class BinaryCamera():
         print "Saving to " + path
         os.makedirs(path) 
         i = 0
-        for frame in self.recording:
-            cv2.imwrite(path + "frame_" + str(i) + ".jpg", frame)
+        f = open(path + "states.txt", "w+")
+        for frame, state in zip(self.recording, self.states):
+            name = "frame_" + str(i) + ".jpg"
+            cv2.imwrite(path + name, frame)
+            f.write(name + self.state2str(state) + "\n") 
             i+=1
+        f.close()
+        self.recording = []
+        self.states = []
 
+    def state2str(self, state):
+        string = ""
+        for s in state:
+            string += " " + str(s)
+
+        return string

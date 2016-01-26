@@ -60,4 +60,3 @@ class NetThree(TensorNet):
 
 #net = NetThree()
 #net.optimize(100, path='net3/net3_01-19-2016_00h47m49s.ckpt')
-

@@ -71,7 +71,8 @@ def im2tensor(im):
         to appropriate pipeline shape and values of either 0 or 1
         cv2 --> tf
     """
-    h, w, c = np.shape(im)
+    shape = np.shape(im)
+    h, w = shape[0], shape[1]
     zeros = np.zeros((h, w, 1))
     zeros[:,:,0] = np.round(im[:,:,0] / 255.0, 0)
     return zeros

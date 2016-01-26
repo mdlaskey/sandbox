@@ -1,0 +1,24 @@
+DEBUG:root:[ Iteration 0 ] Training loss: 0.63255
+DEBUG:root:[ Iteration 1 ] Training loss: 0.645615
+DEBUG:root:Saving...
+DEBUG:root:Saved model to ./net2/net2_01-19-2016_15h08m38s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.550804
+DEBUG:root:Saving...
+DEBUG:root:Saved model to ./net2/net2_01-19-2016_15h12m51s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:Saving...
+DEBUG:root:Saved model to ./net2/net2_01-19-2016_15h14m33s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.554755
+DEBUG:root:Saving...
+DEBUG:root:Saved model to ./net2/net2_01-19-2016_15h27m30s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.655223
+DEBUG:root:[ Iteration 5 ] Training loss: 0.592821
+DEBUG:root:[ Iteration 10 ] Training loss: 0.539573
+DEBUG:root:Saving...
+DEBUG:root:Saved model to ./net2/net2_01-19-2016_15h33m02s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.657901
+DEBUG:root:[ Iteration 5 ] Training loss: 0.64114

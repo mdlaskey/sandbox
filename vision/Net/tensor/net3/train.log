@@ -204,3 +204,50 @@ DEBUG:root:[ Iteration 99 ] Training loss: 0.0957834
 DEBUG:root:Saving...
 DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.121093
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.105152
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.10565
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0997304
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0983797
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.093683
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.100776
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.105812
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0994186
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.102048
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0941739
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3/net3_01-19-2016_00h47m49s.ckpt
+DEBUG:root:Optimization done.

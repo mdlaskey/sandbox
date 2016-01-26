@@ -70,8 +70,8 @@ class TensorNet():
 
         except KeyboardInterrupt:
             pass
-        
         self.save(sess, save_path=path)
+        sess.close()
         self.log( "Optimization done." )
     
 
@@ -85,8 +85,20 @@ class TensorNet():
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():
-            print sess.run(self.y_out, feed_dict={self.x:im})
+            return sess.run(self.y_out, feed_dict={self.x:im})
         
+
+    def output(self, sess, im):
+        """
+            accepts batch of 3d images, converts to tensor
+            and returns four element list of controls
+        """
+        im = inputdata.im2tensor(im)
+        shape = np.shape(im)
+        im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
+        with sess.as_default():
+            return sess.run(self.y_out, feed_dict={self.x:im})
+
 
 
     @staticmethod

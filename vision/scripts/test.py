@@ -22,8 +22,8 @@ bincam = BinaryCamera('./meta.txt')
 bincam.open()
 
 options = Options()
-# options.record = True
 options.show = args['show']
+options.record = True
 
 t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
 izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]); # same with this

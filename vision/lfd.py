@@ -4,7 +4,8 @@ import datetime
 import caffe
 import time
 import numpy as np
-from net.tensor import net2
+import tensorflow as tf
+from Net.tensor import net2, inputdata
 
 class LFD():
 
@@ -23,15 +24,18 @@ class LFD():
             while True:
                 if self.c.override():
                     print "supervisor override"
-                frame = self.bc.read_binary_frame(show=self.options.show, record=self.options.record)
+                state = self.izzy.getState()
+                frame = self.bc.read_frame(show=self.options.show, record=self.options.record, state=state)
                 controls = self.c.getUpdates()
                 self.update_gripper(controls)
                 
-                print "test: " + str(controls)
-                time.sleep(0.03)
+                #print "test: " + str(controls)
+                time.sleep(0.02)
         except KeyboardInterrupt:
             pass
-
+        
+        if self.options.record:
+            self.bc.save_recording()
 
 
 
@@ -42,11 +46,13 @@ class LFD():
         if not dataset_name:
             dataset = Dataset.create_ds(self.options, prefix="deploy")
         else:           
-            dataset = Dataset.get_ds(self.options, dataset)
+            dataset = Dataset.get_ds(self.options, dataset_name)
 
         try:
             while True:
                 controls = self.c.getUpdates()
+                state = self.izzy.getState()
+                
                 if self.c.override():
                     # supervised
                     controls = self.c.getUpdates()
@@ -54,13 +60,13 @@ class LFD():
                     
                     controls = self.controls2simple(controls)
                     if not all(int(c) == 0 for c in controls):
-                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record)
+                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record, state=state)
                         dataset.put(frame, controls)
                     
                     print "supervisor: " + str(controls)
                 else:
                     # autonomous
-                    frame = self.bc.read_binary_frame(record=self.options.record)
+                    frame = self.bc.read_binary_frame(record=self.options.record, state=state)
                     data4D = np.zeros([1, 3, 125, 125])
                     frame = frame / 255.0
                     data4D[0,0,:,:] = frame
@@ -82,26 +88,23 @@ class LFD():
             self.bc.save_recording()
 
 
-    def deploytf(self, dataset_name=''):
-        raise NotImplementedError
-
-
     def learn(self, dataset_name=''):
         
         if not dataset_name:
             dataset = Dataset.create_ds(self.options, prefix='learn')
         else:               
-            dataset = Dataset.get_ds(self.options, dataset)
+            dataset = Dataset.get_ds(self.options, dataset_name)
 
         try:
             while True:
                 controls = self.c.getUpdates()
+                state = self.izzy.getState()
                 self.update_gripper(controls)
 
                 controls = self.controls2simple(controls)
                 if not all(int(c) == 0 for c in controls):
-                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record)
-                        dataset.put(frame, controls)
+                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record, state=state)
+                        dataset.put(frame, controls, state)
                 
                 print "supervisor: " + str(controls)
                 time.sleep(0.05)

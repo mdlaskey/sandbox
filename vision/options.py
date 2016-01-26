@@ -20,8 +20,9 @@ class Options():
     datasets_dir = data_dir + 'datasets/'
     frames_dir = data_dir + 'record_frames/'
     videos_dir = data_dir + 'record_videos/'
-    hdf_dir = root_dir + 'net/hdf/'
-
+    hdf_dir = root_dir + 'Net/hdf/'
+    tf_dir = root_dir + 'Net/tensor/'
+    images_dir = data_dir + 'images/'
 
     def __init__(self):
         self.test = False

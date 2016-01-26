@@ -9,10 +9,11 @@ class Dataset():
         self.options = options
         self.path = options.datasets_dir + self.name + "/"
         self.writer = open(self.path + "controls.txt", 'a')
+        self.state_writer = open(self.path + "states.txt", 'a')
         self.i = Dataset.next_datum_index(self.path)
 
 
-    def put(self, frame, controls):
+    def put(self, frame, controls, state=None):
         filename = "img_" + str(self.i) + ".jpg"
         filepath = self.path + filename
         if os.path.isfile(filepath):
@@ -21,6 +22,9 @@ class Dataset():
         else:
             controls_str = Dataset.controls2str(controls)
             self.writer.write(filename + controls_str + '\n')
+            if state:
+                state_str = Dataset.controls2str(state)            
+                self.state_writer.write(filename + state_str + '\n')
             cv2.imwrite(self.path + filename, frame)
             self.i += 1
 
@@ -74,3 +78,4 @@ class Dataset():
         for c in controls:
             controls_str += " " + str(c)
         return controls_str
+
