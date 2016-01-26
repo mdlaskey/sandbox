@@ -29,7 +29,7 @@ class LFD():
                 controls = self.c.getUpdates()
                 self.update_gripper(controls)
                 
-                #print "test: " + str(controls)
+                print "test: " + str(controls)
                 time.sleep(0.02)
         except KeyboardInterrupt:
             pass

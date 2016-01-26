@@ -14,3 +14,5 @@ legacy/
 !Net/nets/*/logs/*/*.solverstate
 *.ckpt
 *.mov
+.idea/
+*.zip

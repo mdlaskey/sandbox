@@ -85,7 +85,7 @@ class BinaryCamera():
             cv2.imshow("preview", frame)
         return frame
         
-    def read_binary_frame(self, show=False, record=False, state=None):
+    def read_binary_frame(self, show=False, record=False, state=[0.0,0.0,0.0,0.0,0.0,0.0]):
         """ Returns a cropped binary frame of the video
         Significantly slower than read_frame due to the pipeline. """
         

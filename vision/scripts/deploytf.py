@@ -27,7 +27,7 @@ izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]); # same with this
 c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
 
 options.tfnet = net2.NetTwo()
-options.tfnet_sess = options.tfnet.load(var_path='net2/net2..........')
+options.tfnet_sess = options.tfnet.load(var_path='net2/net2................')
 
 options.record=True
 
