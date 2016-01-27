@@ -11,7 +11,18 @@ class Dataset():
         self.writer = open(self.path + "controls.txt", 'a')
         self.state_writer = open(self.path + "states.txt", 'a')
         self.i = Dataset.next_datum_index(self.path)
+        self.staged = []
 
+    def stage(self, frame, controls, state=None):
+        self.staged.append((frame, controls, state))
+
+    def commit(self):
+        print "Committing " + len(self.staged) + " staged elements..."
+        for stage in self.staged:
+            frame, controls, state = stage
+            self.put(frame, controls, state=state)
+        self.staged = []
+        print "Done writing to dataset"
 
     def put(self, frame, controls, state=None):
         filename = "img_" + str(self.i) + ".jpg"

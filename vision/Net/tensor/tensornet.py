@@ -41,7 +41,7 @@ class TensorNet():
         return sess
 
 
-    def optimize(self, iterations, path=None, batch_size=100):
+    def optimize(self, iterations, path=None, data=None, batch_size=100):
         if path:
             sess = self.load(var_path=path)
         else:
@@ -54,7 +54,8 @@ class TensorNet():
         try:
             with sess.as_default():
                 print "Loading data..."
-                data = inputdata.InputData(self.TRAIN_PATH, self.TEST_PATH)
+                if not data:
+                    data = inputdata.InputData(self.TRAIN_PATH, self.TEST_PATH)
                 print "Data loaded."
                 for i in range(iterations):
                     batch = data.next_train_batch(batch_size)
@@ -97,7 +98,7 @@ class TensorNet():
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():
-            return sess.run(self.y_out, feed_dict={self.x:im})
+            return sess.run(self.y_out, feed_dict={self.x:im}) [0]
 
 
 

@@ -61,7 +61,7 @@ class LFD():
                     controls = self.controls2simple(controls)
                     if not all(int(c) == 0 for c in controls):
                         frame = self.bc.read_frame(show=self.options.show, record=self.options.record, state=state)
-                        dataset.put(frame, controls)
+                        dataset.stage(frame, controls, state)
                     
                     print "supervisor: " + str(controls)
                 else:
@@ -83,9 +83,57 @@ class LFD():
                 time.sleep(0.03)
         except KeyboardInterrupt:
             pass
-
+        
+        dataset.commit()
         if self.options.record:
             self.bc.save_recording()
+
+
+    # TODO: un-tested method, deploy on robot and debug
+    def rollout_tf(self, dataset_name=''):
+        net = self.options.tf_net
+        sess = self.options.tf_sess
+        if not dataset_name:
+            dataset = Dataset.create_ds(self.options, prefix='learn')
+        else:               
+            dataset = Dataset.get_ds(self.options, dataset_name)
+        
+        try:
+            while True:
+                controls = self.c.getUpdates()
+                state = self.izzy.getState()
+
+                if self.c.override():
+                    # supervised
+                    self.update_gripper(controls)
+
+                    controls = self.controls2simple(controls)
+                    if not all(int(c) == 0 for c in controls):
+                        frame = self.bc.read_frame(show=self.options.show, record=self.options.record, state=state)
+                        dataset.stage(frame, controls, state)
+
+                    print "supervisor: " + str(controls)
+                
+                else:
+                    # autonomous
+                    frame = self.bc.read_binary_frame(record=self.options.record, state=state)
+                    frame = np.reshape(frame, (125, 125, 1))
+                    net_controls = net.output(sess, frame)
+                    print controls
+                    controls = self.net2controls(net_controls)
+                    self.update_gripper(controls)
+                time.sleep(0.03)
+
+        except KeyboardInterrupt:
+            pass
+        
+        sess.close()
+        dataset.commit()
+        if self.options.record:
+            self.bc.save_recording()
+
+
+
 
 
     def learn(self, dataset_name=''):
@@ -104,7 +152,7 @@ class LFD():
                 controls = self.controls2simple(controls)
                 if not all(int(c) == 0 for c in controls):
                         frame = self.bc.read_frame(show=self.options.show, record=self.options.record, state=state)
-                        dataset.put(frame, controls, state)
+                        dataset.stage(frame, controls, state)
                 
                 print "supervisor: " + str(controls)
                 time.sleep(0.05)
@@ -112,13 +160,12 @@ class LFD():
         except KeyboardInterrupt:
             pass
         
+        dataset.commit()
         if self.options.record:
             self.bc.save_recording()
 
 
-
-
-    def update_gripper(self, controls):
+def update_gripper(self, controls):
         controls[1] = 0
         controls[3] = 0
         self.izzy.control(controls)

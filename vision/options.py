@@ -23,6 +23,7 @@ class Options():
     hdf_dir = root_dir + 'Net/hdf/'
     tf_dir = root_dir + 'Net/tensor/'
     images_dir = data_dir + 'images/'
+    amt_dir = data_dir + 'record_amt/'
 
     def __init__(self):
         self.test = False
