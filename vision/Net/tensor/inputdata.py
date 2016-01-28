@@ -77,3 +77,9 @@ def im2tensor(im):
     zeros[:,:,0] = np.round(im[:,:,0] / 255.0, 0)
     return zeros
 
+
+class AMTData(InputData):
+    
+    def __init__(self, train_path, test_path):
+        train_tups = parse(
+        

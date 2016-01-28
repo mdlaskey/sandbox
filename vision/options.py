@@ -23,7 +23,8 @@ class Options():
     hdf_dir = root_dir + 'Net/hdf/'
     tf_dir = root_dir + 'Net/tensor/'
     images_dir = data_dir + 'images/'
-    amt_dir = data_dir + 'record_amt/'
+    amt_dir = data_dir + 'amt/'
+    record_amt_dir = amt_dir + "record_amt/"
 
     def __init__(self):
         self.test = False
@@ -36,3 +37,16 @@ class Options():
         self.scales = Options.scales
         self.translations = Options.translations
         self.drift = Options.drift
+
+
+class AMTOptions():
+    
+    train_file = "path/to/train.txt"
+    test_file = "path/to/test.txt"
+   
+    ROTATE_UPPER_BOUND = 3.88486
+    ROTATE_LOWER_BOUND = 3.2069
+
+    
+    
+    

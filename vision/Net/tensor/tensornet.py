@@ -4,6 +4,11 @@ import datetime
 import inputdata
 import logging
 import numpy as np
+try:
+    import options
+except:
+    options = None
+    pass
 
 class TensorNet():
 
@@ -49,7 +54,11 @@ class TensorNet():
             sess = tf.Session()
             sess.run(tf.initialize_all_variables())
             
-        logging.basicConfig(filename=self.dir + 'train.log', level=logging.DEBUG)
+        if options:
+            log_path = options.Options.tf_dir + self.dir + 'train.log'
+        else:
+            log_path = self.dir + 'train.log'
+        logging.basicConfig(filename=log_path, level=logging.DEBUG)
         
         try:
             with sess.as_default():
@@ -62,7 +71,7 @@ class TensorNet():
                     ims, labels = batch
 
                     feed_dict = { self.x: ims, self.y_: labels }
-                    if i % 5 == 0:
+                    if i % 3 == 0:
                         batch_loss = self.loss.eval(feed_dict=feed_dict)
                         self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
                     self.train.run(feed_dict=feed_dict)
