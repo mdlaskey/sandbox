@@ -81,13 +81,42 @@ def im2tensor(im):
 class AMTData(InputData):
     
     def __init__(self, train_path, test_path):
-        train_tups = parse(train_path)
-        test_tups = parse(test_path)
+        self.train_tups = parse(train_path)
+        self.test_tups = parse(test_path)
 
         self.i = 0
 
-        random.shuffle(train_tups)
-        random.shuffle(test_tups)
+        random.shuffle(self.train_tups)
+        random.shuffle(self.test_tups)
 
+    def next_train_batch(self, n):
+        """
+        Read into memory on request
+        :param n: number of examples to return in batch
+        :return: tuple with images in [0] and labels in [1]
+        """
+        if self.i + n > len(self.train_tups):
+            self.i = 0
+            random.shuffle(self.train_tups)
+        batch_tups = self.train_tups[self.i:n+self.i]
+        batch = []
+        for path, labels in batch_tups:
+            im = cv2.imread(path)
+            im = im2tensor(im)
+            batch.append((im, labels))
+        batch = zip(*batch)
+        self.i = self.i + n
+        return list(batch[0]), list(batch[1])
 
-        
+    def next_test_batch(self):
+        """
+        read into memory on request
+        :return: tuple with images in [0], labels in [1]
+        """
+        batch = []
+        for path, labels in self.test_tups:
+            im = cv2.imread(path)
+            im = im2tensor(im)
+            batch.append((im, labels))
+        batch = zip(*batch)
+        return list(batch[0]), list(batch[1])

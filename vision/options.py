@@ -43,7 +43,7 @@ class Options():
 
 class AMTOptions(Options):
     
-    train_file = Options.amt_dir + "path/to/train.txt"
+    train_file = Options.amt_dir + "train.txt"
     test_file = Options.amt_dir + "test.txt"
     deltas_file = Options.amt_dir + "deltas.txt"
     rollouts_file = Options.amt_dir + "rollouts.txt"

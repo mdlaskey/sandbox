@@ -42,6 +42,9 @@ class AMT():
         self.recording = []
         self.states = []
 
+    def rollout_caffe(self, iterations=50):
+        raise NotImplementedError
+
     # TODO: write method to handle converting between four dim state space and six dim state space
     def rollout_tf(self, iterations=50):
         net = self.options.tf_net
@@ -75,10 +78,9 @@ class AMT():
         print "There are " + str(num_rollouts) + " rollouts. Save this one? (y/n): "
         char = getch()
         if char == 'y':
-            print "mock save"
-            #return self.save_recordings()
+            return self.save_recording()
         elif char == 'n':
-            return
+            return None
         self.prompt_save()
 
     def delta2state(self, delta_state):
@@ -95,48 +97,74 @@ class AMT():
     def update_weights(self, iterations=10):
         net = self.options.tf_net
         path = self.options.tf_net_path
-        #data = inputdata.InputData(self.options.train_path, self.options.test_path)
-        data = inputdata.InputData(net.TRAIN_PATH, net.TEST_PATH)
+        data = inputdata.AMTData(self.options.train_file, self.options.test_file)
         net.optimize(iterations, batch_size=300, path=path,  data=data)
 
     # TODO: set options paths and transfer dataset aggregation code here (scripts/dagger.py.
     def segment(self):
         raise NotImplementedError
 
-    def save_recording2(self):
-        raise NotImplementedError
+    def save_recording(self):
+        """
+        Save instance recordings and states by writing filename and corresponding state
+        to states files and writing images to master frames dir and appropriate rollout dir.
+        Clear recordings and states from memory when done writing
+        :return:
+        """
+        rollout_name = self.next_rollout()
+        rollout_path = self.options.rollouts_dir + rollout_name + '/'
+
+        print "Saving rollout to " + rollout_path + "..."
+        print "Saving raw frames to " + self.options.originals_dir + "..."
+
+        os.makedirs(rollout_path)
+        raw_states_file = open(self.options.originals_dir + "states.txt", 'a+')
+        rollout_states_file = open(rollout_path + "states.txt", 'a+')
+
+        i = 0
+        for frame, state in zip(self.recording, self.states):
+            filename = rollout_name + "_frame_" + str(i) + ".jpg"
+            raw_states_file.write(filename + self.lst2str(state))
+            rollout_states_file.write(filename + self.lst2str(state))
+            cv2.imwrite(self.options.originals_dir + filename, frame)
+            cv2.imwrite(rollout_path + filename, frame)
+            i += 1
+
+        raw_states_file.close()
+        rollout_states_file.close()
+        self.recording = []
+        self.states = []
+        print "Done saving."
 
     @staticmethod
     def rollout_dirs():
+        """
+        :return: list of strings that are the names of rollout dirs
+        """
         return list(os.walk(AMTOptions.rollouts_dir))[0][1]
 
     @staticmethod
-    def next_rollout_path():
+    def next_rollout():
+        """
+        :return: the String name of the next new potential rollout
+                (i.e. do not overwrite another rollout)
+        """
         i = 0
         prefix = AMTOptions.rollouts_dir + 'rollout'
         path = prefix + str(i) + "/"
         while os.path.exists(path):
             i += 1
             path = prefix + str(i) + "/"
-        return path
+        return 'rollout' + str(i)
 
-    # TODO: rewrite this for rollouts and frames
-    def save_recordings(self):
-        path = self.options.record_amt_dir + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + '/'
-        print "Saving to " + path + "..."
-        os.makedirs(path)
-        i = 0
-        f = open(path + 'states.txt', 'w+')
-        for frame, state in zip(self.recording, self.states):
-            name = "frame_" + str(i) + ".jpg"
-            cv2.imwrite(path + name, frame)
-            f.write(name + self.lst2str(state) + "\n") 
-            i += 1
-        f.close()
-        self.recording = []
-        self.states = []
-
-    def lst2str(self, lst):
+    @staticmethod
+    def lst2str(lst):
+        """
+        returns a space separated string of all elements. A space
+        also precedes the first element.
+        :param lst:
+        :return:
+        """
         s = ""
         for el in lst:
             lst.append(" " + str(el))
