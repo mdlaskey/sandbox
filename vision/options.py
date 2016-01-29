@@ -37,13 +37,23 @@ class Options():
         self.scales = Options.scales
         self.translations = Options.translations
         self.drift = Options.drift
+        self.tf_net = None          # tensorflow model
+        self.tf_net_path = ""       # path to tensorflow model's weights
 
 
-class AMTOptions():
+class AMTOptions(Options):
     
-    train_file = "path/to/train.txt"
-    test_file = "path/to/test.txt"
-   
+    train_file = Options.amt_dir + "path/to/train.txt"
+    test_file = Options.amt_dir + "test.txt"
+    deltas_file = Options.amt_dir + "deltas.txt"
+    rollouts_file = Options.amt_dir + "rollouts.txt"
+
+    rollouts_dir = Options.amt_dir + "rollouts/"
+    binaries_dir = Options.amt_dir + "binaries/"
+    originals_dir = Options.amt_dir + "frames/"
+
+
+
     ROTATE_UPPER_BOUND = 3.88486
     ROTATE_LOWER_BOUND = 3.2069
 

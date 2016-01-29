@@ -81,5 +81,13 @@ def im2tensor(im):
 class AMTData(InputData):
     
     def __init__(self, train_path, test_path):
-        train_tups = parse(
+        train_tups = parse(train_path)
+        test_tups = parse(test_path)
+
+        self.i = 0
+
+        random.shuffle(train_tups)
+        random.shuffle(test_tups)
+
+
         
