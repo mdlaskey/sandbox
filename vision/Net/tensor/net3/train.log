@@ -208,3 +208,37 @@ DEBUG:root:[ Iteration 18 ] Training loss: 0.13583
 DEBUG:root:Saving...
 DEBUG:root:Saved model to /Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_21h46m04s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.585025
+DEBUG:root:[ Iteration 0 ] Test loss: 0.602178
+DEBUG:root:[ Iteration 3 ] Training loss: 0.685298
+DEBUG:root:[ Iteration 6 ] Training loss: 0.626736
+DEBUG:root:[ Iteration 9 ] Training loss: 0.59925
+DEBUG:root:[ Iteration 12 ] Training loss: 0.590516
+DEBUG:root:[ Iteration 15 ] Training loss: 0.596364
+DEBUG:root:[ Iteration 18 ] Training loss: 0.53757
+DEBUG:root:[ Iteration 20 ] Test loss: 0.60313
+DEBUG:root:[ Iteration 21 ] Training loss: 0.556929
+DEBUG:root:[ Iteration 24 ] Training loss: 0.555831
+DEBUG:root:[ Iteration 27 ] Training loss: 0.539823
+DEBUG:root:[ Iteration 30 ] Training loss: 0.573185
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_21h49m54s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.677998
+DEBUG:root:[ Iteration 0 ] Test loss: 0.66692
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_21h52m56s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.594203
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_21h53m49s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.633429
+DEBUG:root:[ Iteration 0 ] Test loss: 0.643874
+DEBUG:root:[ Iteration 3 ] Training loss: 0.665355
+DEBUG:root:[ Iteration 6 ] Training loss: 0.64543
+DEBUG:root:[ Iteration 9 ] Training loss: 0.625475
+DEBUG:root:[ Iteration 12 ] Training loss: 0.606821
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_21h57m09s.ckpt
+DEBUG:root:Optimization done.

@@ -29,8 +29,8 @@ class NetThree(TensorNet):
         self.x = tf.placeholder('float', shape=[None, 150, 150, self.channels])
         self.y_ = tf.placeholder("float", shape=[None, 4])
 
-        self.w_conv1 = self.weight_variable([5, 5, 3, 8])
-        self.b_conv1 = self.bias_variable([8])
+        self.w_conv1 = self.weight_variable([5, 5, self.channels, 9])
+        self.b_conv1 = self.bias_variable([9])
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
 
@@ -57,7 +57,6 @@ class NetThree(TensorNet):
         print depth_slices[0].get_shape().as_list() 
 
         self.filter_summaries = []
-
         for i, depth_slice in enumerate(depth_slices):
             scope = 'jonathan' + str(i)
             self.filter_summaries.append(tf.image_summary(scope, depth_slice, max_images=1))
