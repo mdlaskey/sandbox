@@ -59,8 +59,8 @@ class TensorNet():
         if not var_path:
             raise Exception("No path to model variables specified")
         print "Restoring existing net from " + var_path + "..."
-        #sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1))
-        sess = tf.Session()
+        sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1))
+        #sess = tf.Session()
         with sess.as_default():
             sess.run(tf.initialize_all_variables())
             saver = tf.train.Saver()
@@ -78,8 +78,8 @@ class TensorNet():
             sess = self.load(var_path=path)
         else:
             print "Initializing new variables..."
-            #sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=2, intra_op_parallelism_threads=2))
-            sess = tf.Session()
+            sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1))
+            #sess = tf.Session()
             sess.run(tf.initialize_all_variables())
             
         if options:

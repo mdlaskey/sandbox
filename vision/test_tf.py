@@ -9,5 +9,5 @@ data = inputdata.AMTData(train_file, test_file)
 
 net = net3.NetThree()
 path = '/Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_16h47m09s.ckpt'
-net.optimize(100, data=data, batch_size=50)
+net.optimize(200, data=data, batch_size=100)
 

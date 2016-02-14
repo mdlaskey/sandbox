@@ -242,3 +242,65 @@ DEBUG:root:[ Iteration 12 ] Training loss: 0.606821
 DEBUG:root:Saving...
 DEBUG:root:Saved model to /Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_21h57m09s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.559477
+DEBUG:root:[ Iteration 0 ] Training loss: 0.62864
+DEBUG:root:[ Iteration 0 ] Test loss: 0.67484
+DEBUG:root:[ Iteration 3 ] Training loss: 0.689699
+DEBUG:root:[ Iteration 6 ] Training loss: 0.681015
+DEBUG:root:[ Iteration 9 ] Training loss: 0.565518
+DEBUG:root:[ Iteration 12 ] Training loss: 0.626303
+DEBUG:root:[ Iteration 15 ] Training loss: 0.605461
+DEBUG:root:[ Iteration 18 ] Training loss: 0.591254
+DEBUG:root:[ Iteration 20 ] Test loss: 0.541483
+DEBUG:root:[ Iteration 21 ] Training loss: 0.55962
+DEBUG:root:[ Iteration 24 ] Training loss: 0.568014
+DEBUG:root:[ Iteration 27 ] Training loss: 0.521837
+DEBUG:root:[ Iteration 30 ] Training loss: 0.562425
+DEBUG:root:[ Iteration 33 ] Training loss: 0.529934
+DEBUG:root:[ Iteration 36 ] Training loss: 0.548594
+DEBUG:root:[ Iteration 39 ] Training loss: 0.526579
+DEBUG:root:[ Iteration 40 ] Test loss: 0.541483
+DEBUG:root:[ Iteration 42 ] Training loss: 0.533151
+DEBUG:root:[ Iteration 45 ] Training loss: 0.564317
+DEBUG:root:[ Iteration 48 ] Training loss: 0.591631
+DEBUG:root:[ Iteration 51 ] Training loss: 0.493892
+DEBUG:root:[ Iteration 54 ] Training loss: 0.54952
+DEBUG:root:[ Iteration 57 ] Training loss: 0.515455
+DEBUG:root:[ Iteration 60 ] Training loss: 0.552806
+DEBUG:root:[ Iteration 60 ] Test loss: 0.541483
+DEBUG:root:[ Iteration 63 ] Training loss: 0.561189
+DEBUG:root:[ Iteration 66 ] Training loss: 0.56707
+DEBUG:root:[ Iteration 69 ] Training loss: 0.603134
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /home/jonathan/Documents/projects/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_22h38m48s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.648914
+DEBUG:root:[ Iteration 0 ] Test loss: 0.6666
+DEBUG:root:[ Iteration 3 ] Training loss: 0.654525
+DEBUG:root:[ Iteration 6 ] Training loss: 0.64283
+DEBUG:root:[ Iteration 9 ] Training loss: 0.6444
+DEBUG:root:[ Iteration 12 ] Training loss: 0.669383
+DEBUG:root:[ Iteration 15 ] Training loss: 0.668765
+DEBUG:root:[ Iteration 18 ] Training loss: 0.63748
+DEBUG:root:[ Iteration 20 ] Test loss: 0.6666
+DEBUG:root:[ Iteration 21 ] Training loss: 0.662578
+DEBUG:root:[ Iteration 24 ] Training loss: 0.686895
+DEBUG:root:[ Iteration 27 ] Training loss: 0.706981
+DEBUG:root:[ Iteration 30 ] Training loss: 0.666043
+DEBUG:root:[ Iteration 33 ] Training loss: 0.608273
+DEBUG:root:[ Iteration 36 ] Training loss: 0.689586
+DEBUG:root:[ Iteration 39 ] Training loss: 0.677373
+DEBUG:root:[ Iteration 40 ] Test loss: 0.6666
+DEBUG:root:[ Iteration 42 ] Training loss: 0.650272
+DEBUG:root:[ Iteration 45 ] Training loss: 0.659815
+DEBUG:root:[ Iteration 48 ] Training loss: 0.676003
+DEBUG:root:[ Iteration 51 ] Training loss: 0.641076
+DEBUG:root:[ Iteration 54 ] Training loss: 0.664218
+DEBUG:root:[ Iteration 57 ] Training loss: 0.69478
+DEBUG:root:[ Iteration 60 ] Training loss: 0.657416
+DEBUG:root:[ Iteration 60 ] Test loss: 0.6666
+DEBUG:root:[ Iteration 63 ] Training loss: 0.640611
+DEBUG:root:[ Iteration 66 ] Training loss: 0.626705
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /home/jonathan/Documents/projects/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_22h52m04s.ckpt
+DEBUG:root:Optimization done.
