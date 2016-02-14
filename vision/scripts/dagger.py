@@ -53,7 +53,8 @@ for dataset_name in dataset_names:
         # should segment and import images?
         if segment:
             im = cv2.imread(ds.path + filename)
-            im = bc.pipe(im)
+            im = cv2.resize(im, (150, 150))
+            #im = bc.pipe(im)
             cv2.imwrite(Options.data_dir + "images/" + new_filename, im)
 
         controls_string = Dataset.controls2str(controls)

@@ -23,7 +23,7 @@ bincam.open()
 
 options = Options()
 options.show = args['show']
-options.record = True
+options.record = False
 
 t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
 izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]); # same with this

@@ -1,2 +1,2 @@
-model_checkpoint_path: "/Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/net3/net3_01-19-2016_00h47m49s.ckpt"
-all_model_checkpoint_paths: "/Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/net3/net3_01-19-2016_00h47m49s.ckpt"
+model_checkpoint_path: "/Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_17h10m30s.ckpt"
+all_model_checkpoint_paths: "/Users/JonathanLee/Desktop/sandbox/vision/Net/tensor/./net3/net3_02-13-2016_17h10m30s.ckpt"

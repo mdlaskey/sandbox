@@ -66,7 +66,8 @@ class PyControl:
 
     def sendControls(self,requests):
         # Converts an array of requests to an array of PWM signals sent to the robot
-        # Checks out of bounds 
+        # Checks out of bounds
+        #self.ser.flushOutput()
         PWMs = []
         for i in range(0,len(requests)):
             req = requests[i]

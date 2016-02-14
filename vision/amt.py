@@ -3,15 +3,15 @@
 
 import sys
 import tty, termios
-from options import Options, AMTOptions
+from options import AMTOptions
 from gripper.TurnTableControl import *
 from gripper.PyControl import *
 from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
-from Net.tensor import net2, inputdata, net3
-import datetime
+from Net.tensor import inputdata, net3
 import time
 import os
+import random
 import cv2
 
 def getch():
@@ -42,27 +42,25 @@ class AMT():
         self.recording = []
         self.states = []
 
-    def rollout_caffe(self, iterations=50):
+    def rollout_caffe(self, num_frames=50):
         raise NotImplementedError
 
-    # TODO: write method to handle converting between four dim state space and six dim state space
-    def rollout_tf(self, iterations=50):
+    def rollout_tf(self, num_frames=10):
         net = self.options.tf_net
         path = self.options.tf_net_path
         sess = net.load(var_path=path)
         try:
-            for i in range(iterations):
-                curr_izzy_state = self.izzy.getState()
-                curr_t_state = self.turntable.getState()
-                frame = self.bc.read_binary_frame()
-                self.recording.append((frame, state))
-                frame = np.reshape(frame, (125, 125, 1))
-                
-                delta_state = net.output(sess, frame)
-                new_izzy, new_t = self.delta2state(delta_state)
-                
-                print new_izzy, new_t
+            for i in range(num_frames):
+                frame = self.bc.read_frame()
+                binary_frame = self.bc.pipe(frame)
+                self.recording.append((frame, self.long2short_state(self.izzy.getState(), self.turntable.getState())))
+                binary_frame = np.reshape(binary_frame, (125, 125, 1))
+
+                delta_state = net.output(sess, binary_frame)
+                new_izzy, new_t = self.apply_deltas(delta_state)
+
                 # TODO: uncomment these to update izzy and t
+                print new_izzy, new_t
                 #self.izzy.sendStateRequest(new_izzy)
                 #self.turntable.sendStateRequest(new_t)
 
@@ -80,29 +78,63 @@ class AMT():
         if char == 'y':
             return self.save_recording()
         elif char == 'n':
+            self.recording = []   # erase recordings and states
             return None
         self.prompt_save()
 
-    def delta2state(self, delta_state):
-        curr_state = self.izzy.getState()
-        if not (curr_state[0] + delta_state[0] > self.options.ROTATE_UPPER_BOUND or curr_state[0] + delta_state[0] < self.options.ROTATE_LOWER_BOUND):
-            curr_state[0] += delta_state[0]
-        curr_state[2] += delta_state[1]
-        curr_state[4] += delta_state[2]
-        t_state = self.turntable.getState()
-        t_state[0] += delta_state[3]
-        return curr_state, t_state
+    def apply_deltas(self, delta_state):
+        izzy_state = list(self.izzy.getState())
+        new_izzy = list(izzy_state)
+        t_state = list(self.turntable.getState())
+        new_t = list(t_state)
+        type(new_izzy[0])
+        """new_izzy[0] = izzy_state[0] + delta_state[0] / 1000.0
+        if new_izzy[0] > self.options.ROTATE_UPPER_BOUND:
+            new_izzy[0] = self.options.ROTATE_UPPER_BOUND
+        if new_izzy[0] < self.options.ROTATE_LOWER_BOUND:
+            new_izzy[0] = self.options.ROTATE_LOWER_BOUND
+        new_izzy[1] = izzy_state[1]
+        new_izzy[2] = izzy_state[2] + delta_state[1] / 1000.0
+        new_izzy[3] = izzy_state[3]
+        new_izzy[4] = izzy_state[4] + delta_state[2] / 1000.0
+        new_izzy[5] = izzy_state[5]
+        new_t[0] = t_state[0] + delta_state[3]"""
+        return new_izzy, new_t
 
-    # TODO: update inputdata to not load all images into memory, just one batch at a time
+
+    @staticmethod
+    def short2long_state(short_state):
+        izzy_state = [short_state[0], 0, short_state[1], 0, short_state[2], 0]
+        t_state = [short_state[-1]]
+        return izzy_state, t_state
+
+    @staticmethod
+    def long2short_state(izzy_state, t_state):
+        return [izzy_state[0], izzy_state[2], izzy_state[4], t_state[0]]
+
     def update_weights(self, iterations=10):
+
         net = self.options.tf_net
         path = self.options.tf_net_path
         data = inputdata.AMTData(self.options.train_file, self.options.test_file)
-        net.optimize(iterations, batch_size=300, path=path,  data=data)
+        self.options.tf_net_path = net.optimize(iterations, batch_size=300, path=path,  data=data)
 
-    # TODO: set options paths and transfer dataset aggregation code here (scripts/dagger.py.
-    def segment(self):
-        raise NotImplementedError
+    def segment(self, frame):
+        binary_frame = self.bc.pipe(frame)
+        return binary_frame
+
+
+    def write_train_test_sets(self):
+        deltas_file = open(self.options.deltas_file, 'r')
+        train_writer = open(self.options.train_file, 'w+')
+        test_writer = open(self.options.test_file, 'w+')
+        for line in deltas_file:
+            new_line = self.options.binaries_dir + line
+            if random.random() > .2:
+                train_writer.write(new_line)
+            else:
+                test_writer.write(new_line)
+
 
     def save_recording(self):
         """
@@ -116,24 +148,24 @@ class AMT():
 
         print "Saving rollout to " + rollout_path + "..."
         print "Saving raw frames to " + self.options.originals_dir + "..."
+        print "Saving binaries to " + self.options.binaries_dir + "..."
 
         os.makedirs(rollout_path)
         raw_states_file = open(self.options.originals_dir + "states.txt", 'a+')
         rollout_states_file = open(rollout_path + "states.txt", 'a+')
 
         i = 0
-        for frame, state in zip(self.recording, self.states):
+        for frame, state in self.recording:
             filename = rollout_name + "_frame_" + str(i) + ".jpg"
-            raw_states_file.write(filename + self.lst2str(state))
-            rollout_states_file.write(filename + self.lst2str(state))
+            raw_states_file.write(filename + self.lst2str(state) + "\n")
+            rollout_states_file.write(filename + self.lst2str(state) + "\n")
             cv2.imwrite(self.options.originals_dir + filename, frame)
+            cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
             cv2.imwrite(rollout_path + filename, frame)
             i += 1
-
         raw_states_file.close()
         rollout_states_file.close()
         self.recording = []
-        self.states = []
         print "Done saving."
 
     @staticmethod
@@ -167,10 +199,8 @@ class AMT():
         """
         s = ""
         for el in lst:
-            lst.append(" " + str(el))
+            s += " " + str(el)
         return s
-
-
 
 
 if __name__ == "__main__":
@@ -183,6 +213,7 @@ if __name__ == "__main__":
     izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]) # same with this
     #c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
     c = None
+
     #options.tf_net = net2.NetTwo()
     #options.tf_net_path = options.tf_dir + 'net2/net2_01-21-2016_02h14m08s.ckpt'
     options.tf_net = net3.NetThree()

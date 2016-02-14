@@ -164,8 +164,7 @@ class LFD():
         if self.options.record:
             self.bc.save_recording()
 
-
-def update_gripper(self, controls):
+    def update_gripper(self, controls):
         controls[1] = 0
         controls[3] = 0
         self.izzy.control(controls)

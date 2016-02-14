@@ -27,8 +27,8 @@ class NetThree(TensorNet):
         self.x = tf.placeholder('float', shape=[None, 125, 125, 1])
         self.y_ = tf.placeholder("float", shape=[None, 4])
 
-        self.w_conv1 = self.weight_variable([5, 5, 1, 32])
-        self.b_conv1 = self.bias_variable([32])
+        self.w_conv1 = self.weight_variable([5, 5, 1, 8])
+        self.b_conv1 = self.bias_variable([8])
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
 
@@ -50,8 +50,11 @@ class NetThree(TensorNet):
         self.train_step = tf.train.MomentumOptimizer(.003, .9)
         self.train = self.train_step.minimize(self.loss)
 
-        
-        
+        #self.filter_summary = tf.image_summary("", self.w_conv1)
+        depth_slices = tf.split(3, self.h_conv1.get_shape().as_list()[-1], self.h_conv1)
+        print depth_slices[0].get_shape().as_list() 
+    
+        self.filter_summary = tf.image_summary('jonathan0', depth_slices[0], max_images=1)
 
 
     
