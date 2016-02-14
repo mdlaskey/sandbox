@@ -21,13 +21,13 @@ import argparse
 
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-d', '--datasets', required=True)
+#ap.add_argument('-d', '--datasets', required=True)
 ap.add_argument('-s', '--segment', required=False, action='store_true')
 args = vars(ap.parse_args())
 
 segment = args['segment']
-dataset_names = args['datasets'].split(' ')
-
+#dataset_names = args['datasets'].split(' ')
+dataset_names = ['dataset1', 'learn_01-25-2016_17h39m01s', 'learn_01-25-2016_17h40m48s', 'supervisor_12-16-2015_14h42m41s', 'supervisor_net3_12-10-2015']
 
 # erase former data in files and open new writers
 open("Net/hdf/train.txt", 'w').close()
@@ -55,10 +55,10 @@ for dataset_name in dataset_names:
             im = cv2.imread(ds.path + filename)
             im = cv2.resize(im, (150, 150))
             #im = bc.pipe(im)
-            cv2.imwrite(Options.data_dir + "images/" + new_filename, im)
+            cv2.imwrite(Options.data_dir + "color_images/" + new_filename, im)
 
         controls_string = Dataset.controls2str(controls)
-        line = Options.data_dir + "images/" + new_filename + controls_string + "\n"
+        line = Options.data_dir + "color_images/" + new_filename + controls_string + "\n"
         
         if random.random() > .2:    train_writer.write(line)
         else:                       test_writer.write(line)
@@ -68,9 +68,9 @@ test_writer.close()
 
 # load images into h5 files
 print "converting train set to hdf..."
-hdf.img2hdf('Net/hdf/train', Options.hdf_dir + "train.h5")
+#hdf.img2hdf('Net/hdf/train', Options.hdf_dir + "train.h5")
 
 print "converting test set to hdf..."
-hdf.img2hdf('Net/hdf/test', Options.hdf_dir + "test.h5")
+#hdf.img2hdf('Net/hdf/test', Options.hdf_dir + "test.h5")
 
 print "Done."

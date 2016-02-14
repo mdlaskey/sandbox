@@ -59,7 +59,7 @@ class TensorNet():
         if not var_path:
             raise Exception("No path to model variables specified")
         print "Restoring existing net from " + var_path + "..."
-        sess = tf.Session()
+        sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1))
         with sess.as_default():
             sess.run(tf.initialize_all_variables())
             saver = tf.train.Saver()
@@ -77,7 +77,7 @@ class TensorNet():
             sess = self.load(var_path=path)
         else:
             print "Initializing new variables..."
-            sess = tf.Session()
+            sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=2, intra_op_parallelism_threads=2))
             sess.run(tf.initialize_all_variables())
             
         if options:
@@ -85,7 +85,8 @@ class TensorNet():
         else:
             self.log_path = self.dir + 'train.log'
         #logging.basicConfig(filename=log_path, level=logging.DEBUG)
-        
+
+
         try:
             with sess.as_default():
                 summary_writer = tf.train.SummaryWriter('/tmp/logs', sess.graph_def)
@@ -97,8 +98,8 @@ class TensorNet():
                     if i % 3 == 0:
                         batch_loss = self.loss.eval(feed_dict=feed_dict)
                         self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
-                        filtsum = self.filter_summary.eval(feed_dict=feed_dict)
-                        summary_writer.add_summary(filtsum, i)
+                        #filtsum = self.filter_summary.eval(feed_dict=feed_dict)
+                        #summary_writer.add_summary(filtsum, i)
                     if i % test_print == 0:
                         test_batch = data.next_test_batch()
                         test_ims, test_labels = test_batch
@@ -107,10 +108,14 @@ class TensorNet():
                         self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
                     self.train.run(feed_dict=feed_dict)
                     
-
+                for filtsum in self.filter_summaries:
+                    filtsum = filtsum.eval(feed_dict=feed_dict)
+                    summary_writer.add_summary(filtsum, i)
         except KeyboardInterrupt:
             pass
-        
+
+
+
         if path:
             dir, old_name = os.path.split(path)
             dir = dir + "/"
@@ -129,7 +134,7 @@ class TensorNet():
             0-255 and returns controls in four element list
         """
         sess = self.load(var_path=path)
-        im = inputdata.im2tensor(im)
+        im = inputdata.im2tensor(im, self.channels)
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():
@@ -141,7 +146,7 @@ class TensorNet():
             accepts batch of 3d images, converts to tensor
             and returns four element list of controls
         """
-        im = inputdata.im2tensor(im)
+        im = inputdata.im2tensor(im, self.channels)
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():

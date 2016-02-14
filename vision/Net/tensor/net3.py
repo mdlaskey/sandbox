@@ -24,10 +24,12 @@ class NetThree(TensorNet):
         self.dir = "./net3/"
         self.name = "net3"
 
-        self.x = tf.placeholder('float', shape=[None, 125, 125, 1])
+        self.channels = 3
+
+        self.x = tf.placeholder('float', shape=[None, 150, 150, self.channels])
         self.y_ = tf.placeholder("float", shape=[None, 4])
 
-        self.w_conv1 = self.weight_variable([5, 5, 1, 8])
+        self.w_conv1 = self.weight_variable([5, 5, 3, 8])
         self.b_conv1 = self.bias_variable([8])
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
@@ -53,8 +55,14 @@ class NetThree(TensorNet):
         #self.filter_summary = tf.image_summary("", self.w_conv1)
         depth_slices = tf.split(3, self.h_conv1.get_shape().as_list()[-1], self.h_conv1)
         print depth_slices[0].get_shape().as_list() 
-    
-        self.filter_summary = tf.image_summary('jonathan0', depth_slices[0], max_images=1)
+
+        self.filter_summaries = []
+
+        for i, depth_slice in enumerate(depth_slices):
+            scope = 'jonathan' + str(i)
+            self.filter_summaries.append(tf.image_summary(scope, depth_slice, max_images=1))
+
+        #self.filter_summary = tf.image_summary('jonathan0', depth_slices[0], max_images=1)
 
 
     
