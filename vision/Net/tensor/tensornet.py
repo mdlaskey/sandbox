@@ -59,7 +59,8 @@ class TensorNet():
         if not var_path:
             raise Exception("No path to model variables specified")
         print "Restoring existing net from " + var_path + "..."
-        sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1))
+        #sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=1, intra_op_parallelism_threads=1))
+        sess = tf.Session()
         with sess.as_default():
             sess.run(tf.initialize_all_variables())
             saver = tf.train.Saver()
@@ -77,7 +78,8 @@ class TensorNet():
             sess = self.load(var_path=path)
         else:
             print "Initializing new variables..."
-            sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=2, intra_op_parallelism_threads=2))
+            #sess = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=2, intra_op_parallelism_threads=2))
+            sess = tf.Session()
             sess.run(tf.initialize_all_variables())
             
         if options:
@@ -107,14 +109,15 @@ class TensorNet():
                         test_loss = self.loss.eval(feed_dict=test_dict)
                         self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
                     self.train.run(feed_dict=feed_dict)
-                    
-                for filtsum in self.filter_summaries:
-                    filtsum = filtsum.eval(feed_dict=feed_dict)
-                    summary_writer.add_summary(filtsum, i)
+                
+                
         except KeyboardInterrupt:
             pass
 
-
+        with sess.as_default():
+            for filtsum in self.filter_summaries:
+                filtsum = filtsum.eval(feed_dict=feed_dict)
+                summary_writer.add_summary(filtsum, i)
 
         if path:
             dir, old_name = os.path.split(path)

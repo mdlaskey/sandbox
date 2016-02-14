@@ -61,7 +61,6 @@ class NetThree(TensorNet):
         for i, depth_slice in enumerate(depth_slices):
             scope = 'jonathan' + str(i)
             self.filter_summaries.append(tf.image_summary(scope, depth_slice, max_images=1))
-
         #self.filter_summary = tf.image_summary('jonathan0', depth_slices[0], max_images=1)
 
 
